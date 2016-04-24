@@ -1,0 +1,319 @@
+marx-js-controls,
+marx-js-ipsum {
+  font-family: Arial, sans-serif;
+}
+marx-js-controls p,
+marx-js-ipsum p,
+marx-js-controls a,
+marx-js-ipsum a,
+marx-js-controls li,
+marx-js-ipsum li,
+marx-js-controls label,
+marx-js-ipsum label {
+  font-size: 16px;
+  line-height: 1.5em;
+  color: #333;
+}
+marx-js-controls h4,
+marx-js-ipsum h4 {
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+marx-js-controls {
+  position: fixed;
+  z-index: 2000;
+  display: flex;
+  background: #f6f6f6;
+  -webkit-box-shadow: 0 0 8px rgba(0,0,0,0.7);
+  -moz-box-shadow: 0 0 8px rgba(0,0,0,0.7);
+  -o-box-shadow: 0 0 8px rgba(0,0,0,0.7);
+  box-shadow: 0 0 8px rgba(0,0,0,0.7);
+}
+marx-js-controls a {
+  color: #333;
+  text-decoration: none;
+  background-color: #ddd;
+}
+marx-js-controls a:hover {
+  background-color: #ccc;
+}
+marx-js-controls a.marx-toggle-advanced {
+  background: transparent;
+  margin: 5px 0;
+}
+marx-js-controls a.marx-toggle-advanced:hover {
+  background: transparent;
+}
+marx-js-ipsum {
+  background: #0f0;
+  position: fixed;
+  z-index: 1000;
+  width: 360px;
+  padding: 20px;
+  background: #f6f6f6;
+  -webkit-box-shadow: 0 0 8px rgba(0,0,0,0.7);
+  -moz-box-shadow: 0 0 8px rgba(0,0,0,0.7);
+  -o-box-shadow: 0 0 8px rgba(0,0,0,0.7);
+  box-shadow: 0 0 8px rgba(0,0,0,0.7);
+}
+marx-js-ipsum .marx-container {
+  overflow-y: auto;
+  max-height: 360px;
+  margin-top: 30px;
+}
+marx-js-ipsum ipsum-para {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 15px;
+  line-height: 1.5em;
+}
+marx-js-ipsum a.marx-ipsum-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: block;
+  width: 30px;
+  padding: 3px 0;
+  color: #fff;
+  background-color: #333;
+  text-align: center;
+  text-decoration: none;
+}
+standard-controls,
+advanced-controls {
+  display: none;
+  flex: 1;
+  min-width: 310px;
+  padding: 20px;
+}
+standard-controls control,
+advanced-controls control {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row-reverse;
+  align-items: center;
+  margin: 5px 0;
+  padding: 5px 0;
+  border-bottom: 1px solid #ddd;
+}
+standard-controls control p,
+advanced-controls control p {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 3;
+  margin: 0;
+}
+standard-controls control a,
+advanced-controls control a {
+  padding: 2px 8px;
+  margin-left: auto;
+  border: 1px solid #ccc;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  -o-border-radius: 2px;
+  border-radius: 2px;
+}
+standard-controls control ipsum,
+advanced-controls control ipsum {
+  width: 100%;
+}
+standard-controls control input[type=number],
+advanced-controls control input[type=number] {
+  font-size: 16px;
+  width: 40px;
+  padding: 2px 5px;
+  margin-right: 8px;
+}
+marx-js-open {
+  position: absolute;
+  color: #333;
+  text-align: right;
+}
+marx-js-open a.quick-populate {
+  padding: 10px;
+  margin-left: auto;
+}
+marx-js-open a.quick-populate,
+marx-js-open a.standard-controls,
+marx-js-open a.advanced-controls {
+  display: block;
+  background-color: transparent;
+}
+marx-js-open a.quick-populate:hover,
+marx-js-open a.standard-controls:hover,
+marx-js-open a.advanced-controls:hover {
+  background-color: #ccc;
+}
+marx-js-open a.standard-controls,
+marx-js-open a.advanced-controls {
+  width: 40px;
+  padding: 10px 0;
+  text-indent: -9999px;
+  overflow: hidden;
+  background-repeat: no-repeat;
+  background-position: center center;
+  -webkit-background-size: 24px 24px;
+  -moz-background-size: 24px 24px;
+  -ms-background-size: 24px 24px;
+  -o-background-size: 24px 24px;
+  text-align: left;
+}
+marx-js-open a.standard-controls {
+  background-image: url("http://marxjs.com/assets/icons/standard.png");
+}
+marx-js-open a.advanced-controls {
+  background-image: url("http://marxjs.com/assets/icons/advanced.png");
+}
+marx-js-open a.open-controls,
+marx-js-open .open-controls-group {
+  background-image: url("http://marxjs.com/assets/icons/groucho.png");
+  background-color: #ddd;
+  background-repeat: no-repeat;
+  background-position: 5px center;
+  -webkit-background-size: 32px 32px;
+  -moz-background-size: 32px 32px;
+  -ms-background-size: 32px 32px;
+  -o-background-size: 32px 32px;
+}
+marx-js-open .open-controls-group {
+  display: flex;
+  width: 195px;
+}
+marx-js-open a.open-controls {
+  display: block;
+  width: 100px;
+  padding: 10px 10px 10px 0;
+}
+marx-js-open a.open-controls:hover {
+  background-color: #ccc;
+}
+toggle-advanced {
+  float: right;
+}
+toggle-advanced a {
+  background: transparent;
+  margin: 5px 0;
+}
+toggle-advanced a:hover {
+  background: transparent;
+}
+spinner {
+  margin: 30px auto;
+  font-size: 10px;
+  display: block;
+  position: relative;
+  text-indent: -9999em;
+  border: 1.1em solid rgba(102,102,102,0.2);
+  border-left: 1.1em solid #666;
+  transform: translateZ(0);
+  animation: load8 1.1s infinite linear;
+}
+spinner,
+spinner:after {
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -o-border-radius: 50%;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  overflow: hidden;
+}
+@-webkit-keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+.marx-bottom-right,
+.marx-bottom-left {
+  bottom: 0;
+  padding-bottom: 40px;
+  border-top: 1px solid #ddd;
+}
+.marx-bottom-right marx-js-open,
+.marx-bottom-left marx-js-open {
+  bottom: 0;
+}
+.marx-top-right,
+.marx-bottom-right {
+  right: 0;
+  padding-bottom: 50px;
+  border-left: 1px solid #ddd;
+}
+.marx-top-right marx-js-open,
+.marx-bottom-right marx-js-open {
+  right: 0;
+}
+.marx-top-right,
+.marx-top-left {
+  top: 0;
+  padding-top: 40px;
+  border-bottom: 1px solid #ddd;
+}
+.marx-top-right marx-js-open,
+.marx-top-left marx-js-open {
+  top: 0;
+}
+.marx-top-left,
+.marx-bottom-left {
+  left: 0;
+  border-right: 1px solid #ddd;
+}
+.marx-top-left marx-js-open,
+.marx-bottom-left marx-js-open {
+  left: 0;
+}
+marx-js-ipsum.marx-bottom-right,
+marx-js-ipsum.marx-top-right {
+  left: 0;
+  border-right: 1px solid #ddd;
+}
+marx-js-ipsum.marx-top-left,
+marx-js-ipsum.marx-bottom-left {
+  right: 0;
+  border-left: 1px solid #ddd;
+}
+@-moz-keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@-webkit-keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@-o-keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
