@@ -1,28 +1,37 @@
+marx-js-notifications,
 marx-js-controls,
 marx-js-ipsum {
   font-family: Arial, sans-serif;
 }
+marx-js-notifications p,
 marx-js-controls p,
 marx-js-ipsum p,
+marx-js-notifications a,
 marx-js-controls a,
 marx-js-ipsum a,
+marx-js-notifications li,
 marx-js-controls li,
 marx-js-ipsum li,
+marx-js-notifications label,
 marx-js-controls label,
 marx-js-ipsum label {
   font-size: 16px;
   line-height: 1.5em;
   color: #333;
 }
+marx-js-notifications h4,
 marx-js-controls h4,
 marx-js-ipsum h4 {
   font-size: 24px;
   margin-bottom: 15px;
 }
+marx-js-notifications,
 marx-js-controls {
   position: fixed;
   z-index: 2000;
   display: flex;
+}
+marx-js-controls {
   background: #f6f6f6;
   -webkit-box-shadow: 0 0 8px rgba(0,0,0,0.7);
   -moz-box-shadow: 0 0 8px rgba(0,0,0,0.7);
@@ -78,6 +87,21 @@ marx-js-ipsum a.marx-ipsum-close {
   background-color: #333;
   text-align: center;
   text-decoration: none;
+}
+marx-js-notifications {
+  flex-direction: column;
+}
+marx-js-notifications notification {
+  display: block;
+  padding: 3px 5px;
+  margin-bottom: 15px;
+  background-color: rgba(51,51,51,0.8);
+  border: 1px solid #333;
+  color: #ddd;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -o-border-radius: 3px;
+  border-radius: 3px;
 }
 standard-controls,
 advanced-controls {
@@ -228,43 +252,43 @@ spinner:after {
     transform: rotate(360deg);
   }
 }
-.marx-bottom-right,
-.marx-bottom-left {
+marx-js-controls.marx-bottom-right,
+marx-js-controls.marx-bottom-left {
   bottom: 0;
   padding-bottom: 40px;
   border-top: 1px solid #ddd;
 }
-.marx-bottom-right marx-js-open,
-.marx-bottom-left marx-js-open {
+marx-js-controls.marx-bottom-right marx-js-open,
+marx-js-controls.marx-bottom-left marx-js-open {
   bottom: 0;
 }
-.marx-top-right,
-.marx-bottom-right {
+marx-js-controls.marx-top-right,
+marx-js-controls.marx-bottom-right {
   right: 0;
   padding-bottom: 50px;
   border-left: 1px solid #ddd;
 }
-.marx-top-right marx-js-open,
-.marx-bottom-right marx-js-open {
+marx-js-controls.marx-top-right marx-js-open,
+marx-js-controls.marx-bottom-right marx-js-open {
   right: 0;
 }
-.marx-top-right,
-.marx-top-left {
+marx-js-controls.marx-top-right,
+marx-js-controls.marx-top-left {
   top: 0;
   padding-top: 40px;
   border-bottom: 1px solid #ddd;
 }
-.marx-top-right marx-js-open,
-.marx-top-left marx-js-open {
+marx-js-controls.marx-top-right marx-js-open,
+marx-js-controls.marx-top-left marx-js-open {
   top: 0;
 }
-.marx-top-left,
-.marx-bottom-left {
+marx-js-controls.marx-top-left,
+marx-js-controls.marx-bottom-left {
   left: 0;
   border-right: 1px solid #ddd;
 }
-.marx-top-left marx-js-open,
-.marx-bottom-left marx-js-open {
+marx-js-controls.marx-top-left marx-js-open,
+marx-js-controls.marx-bottom-left marx-js-open {
   left: 0;
 }
 marx-js-ipsum.marx-bottom-right,

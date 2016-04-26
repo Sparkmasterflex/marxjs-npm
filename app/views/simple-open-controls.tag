@@ -7,7 +7,6 @@ riot = require('riot')
       if opts.controls is "minimum"
         marx.populate_whole_form()
       else
-        console.log('hello?');
         $('standard-controls').slideToggle 'fast'
         if opts.controls is 'advanced'
           $('advanced-controls').slideToggle 'fast'

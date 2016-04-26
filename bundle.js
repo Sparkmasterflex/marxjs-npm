@@ -7,12 +7,12 @@ Marx = require('./marx');
 
 $(function() {
   return window.marx = new Marx({
-    controls: 'toggle-all'
+    controls: 'advanced'
   });
 });
 
-},{"./marx":2,"jquery":7}],2:[function(require,module,exports){
-var $, Marx, advanced, controls, ipsum, riot, simple,
+},{"./marx":2,"jquery":8}],2:[function(require,module,exports){
+var $, Marx, advanced, controls, ipsum, notifications, riot, simple,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 $ = require('jquery');
@@ -22,6 +22,8 @@ riot = require('riot');
 controls = require('../views/marx-js-controls.js');
 
 ipsum = require('../views/marx-js-ipsum.js');
+
+notifications = require('../views/marx-js-notifications.js');
 
 simple = require('../views/simple-open-controls.js');
 
@@ -60,13 +62,17 @@ Marx = (function() {
   };
 
   Marx.prototype.create_controls = function() {
-    var open_template;
-    $('body').append("<marx-js-controls></marx-js-controls>");
+    var open_template, tags;
+    $('body').append("<marx-js-notifications></marx-js-notifications>\n<marx-js-controls></marx-js-controls>");
     riot.mount('marx-js-controls', {
       settings: this.settings,
       advanced: ['standard', 'minimum'].indexOf(this.settings.controls) === -1,
       toggle_advanced: this.settings.controls === 'toggle-advanced'
     });
+    tags = riot.mount('marx-js-notifications', {
+      position: this.settings.position
+    });
+    this.notifications = tags[0];
     this.$el = $('marx-js-controls');
     open_template = this.settings.controls === 'toggle-all' ? 'advanced-open-controls' : 'simple-open-controls';
     riot.mount('marx-js-open', open_template, {
@@ -133,6 +139,8 @@ Marx = (function() {
           obj = marx.get_random();
           brother = JSON.parse(obj.brother);
           movie = JSON.parse(obj.movie);
+          rand = Math.random();
+          year = movie.year.toString();
           strings = [brother.name, movie.name, obj.first_name, obj.last_name, obj.description].filter(function() {
             return true;
           });
@@ -145,8 +153,6 @@ Marx = (function() {
               case 'url':
                 return "http://" + (movie.name.toLowerCase().replace(/\s/g, '')) + ".com";
               case 'date':
-                rand = Math.random();
-                year = movie.year.toString();
                 return year + "-0" + (year.substr(Math.floor(rand * 4), 1)) + "-2" + (year.substr(Math.floor(rand * 4), 1));
               default:
                 str = strings[Math.floor(Math.random() * strings.length)];
@@ -273,23 +279,40 @@ Marx = (function() {
   };
 
   Marx.prototype.trigger_notifications = function() {
-    var num;
-    num = 0;
-    return $.each(this.effected, (function(_this) {
+    this.notifications.alerts = [];
+    $.each(this.effected, (function(_this) {
       return function(key, val) {
-        var $note, el;
+        var el;
         if (val !== 0) {
           el = key.replace(/_/, ' ');
-          $note = $("<p class='marx-notification'>" + val + " " + el + " elements were altered</p>");
-          _this.$el.append($note);
-          $note.css('top', (20 + (num * 50)) + "px").delay(5000 + (num * 50)).slideUp('fast', function() {
-            return $note.remove();
+          _this.notifications.alerts.push({
+            count: val,
+            element: el
           });
-          num += 1;
-          return _this.effected[key] = 0;
         }
+        return _this.effected[key] = 0;
       };
     })(this));
+    this.notifications.update();
+    return this.position_notifications();
+  };
+
+  Marx.prototype.position_notifications = function() {
+    var notification_bottom;
+    notification_bottom = ($('marx-js-controls').height() + 40) - $('marx-js-notifications').height();
+    $('marx-js-notifications').hide().slideDown('fast');
+    $('marx-js-notifications').css({
+      bottom: notification_bottom,
+      right: $('marx-js-controls').width()
+    });
+    return setTimeout((function(_this) {
+      return function() {
+        return $('notification').slideUp('fast', function() {
+          _this.notifications.alerts = null;
+          return _this.notifications.update();
+        });
+      };
+    })(this), 5000);
   };
 
   Marx.prototype.toggle_description = function($link) {
@@ -348,26 +371,28 @@ Marx = (function() {
    */
 
   Marx.prototype.popluate_selected_fields = function(e) {
-    switch ($(e.target).attr('class')) {
-      case 'populate-textareas':
-        this.populate_textareas();
-        break;
-      case 'populate-inputs':
-        this.populate_inputs();
-        break;
-      case 'populate-checkboxes':
-        this.populate_checkboxes();
-        break;
-      case 'populate-radios':
-        this.populate_radios();
-        break;
-      case 'populate-selects':
-        this.populate_selects();
-        break;
-      default:
-        this.populate_whole_form();
-    }
-    this.trigger_notifications();
+    var fn;
+    fn = (function() {
+      switch ($(e.target).attr('class')) {
+        case 'populate-textareas':
+          return this.populate_textareas;
+        case 'populate-inputs':
+          return this.populate_inputs;
+        case 'populate-checkboxes':
+          return this.populate_checkboxes;
+        case 'populate-radios':
+          return this.populate_radios;
+        case 'populate-selects':
+          return this.populate_selects;
+        default:
+          return this.populate_whole_form;
+      }
+    }).call(this);
+    $.when(fn()).then((function(_this) {
+      return function() {
+        return _this.trigger_notifications();
+      };
+    })(this));
     return false;
   };
 
@@ -434,7 +459,7 @@ Marx = (function() {
 
 module.exports = Marx;
 
-},{"../views/advanced-open-controls.js":3,"../views/marx-js-controls.js":4,"../views/marx-js-ipsum.js":5,"../views/simple-open-controls.js":6,"jquery":7,"riot":8}],3:[function(require,module,exports){
+},{"../views/advanced-open-controls.js":3,"../views/marx-js-controls.js":4,"../views/marx-js-ipsum.js":5,"../views/marx-js-notifications.js":6,"../views/simple-open-controls.js":7,"jquery":8,"riot":9}],3:[function(require,module,exports){
 (function(tagger) {
   if (typeof define === 'function' && define.amd) {
     define(['riot'], function(riot) { tagger(riot); });
@@ -463,7 +488,7 @@ this.open_advanced = function(e) {
 });
 
 });
-},{"jquery":7,"riot":8}],4:[function(require,module,exports){
+},{"jquery":8,"riot":9}],4:[function(require,module,exports){
 (function(tagger) {
   if (typeof define === 'function' && define.amd) {
     define(['riot'], function(riot) { tagger(riot); });
@@ -529,7 +554,7 @@ riot.tag2('toggle-advanced', '<a onclick="{marx.toggle_advanced}" href="#advance
 });
 
 });
-},{"riot":8}],5:[function(require,module,exports){
+},{"riot":9}],5:[function(require,module,exports){
 (function(tagger) {
   if (typeof define === 'function' && define.amd) {
     define(['riot'], function(riot) { tagger(riot); });
@@ -565,7 +590,23 @@ this.close_ipsum = function(e) {
 });
 
 });
-},{"jquery":7,"riot":8}],6:[function(require,module,exports){
+},{"jquery":8,"riot":9}],6:[function(require,module,exports){
+(function(tagger) {
+  if (typeof define === 'function' && define.amd) {
+    define(['riot'], function(riot) { tagger(riot); });
+  } else if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    tagger(require('riot'));
+  } else {
+    tagger(window.riot);
+  }
+})(function(riot) {
+riot = require('riot')
+
+riot.tag2('marx-js-notifications', '<notification if="{this.alerts}" each="{this.alerts}"> {this.count} {this.element} elements were altered </notification>', '', 'class="marx-{opts.position}"', function(opts) {
+});
+
+});
+},{"riot":9}],7:[function(require,module,exports){
 (function(tagger) {
   if (typeof define === 'function' && define.amd) {
     define(['riot'], function(riot) { tagger(riot); });
@@ -581,7 +622,6 @@ this.activate_controls = function(e) {
   if (opts.controls === "minimum") {
     marx.populate_whole_form();
   } else {
-    console.log('hello?');
     $('standard-controls').slideToggle('fast');
     if (opts.controls === 'advanced') {
       $('advanced-controls').slideToggle('fast');
@@ -592,7 +632,7 @@ this.activate_controls = function(e) {
 });
 
 });
-},{"riot":8}],7:[function(require,module,exports){
+},{"riot":9}],8:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.2.3
  * http://jquery.com/
@@ -10436,7 +10476,7 @@ if ( !noGlobal ) {
 return jQuery;
 }));
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /* Riot v2.3.18, @license MIT */
 
 ;(function(window, undefined) {

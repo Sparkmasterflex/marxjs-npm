@@ -2,6 +2,7 @@ $        = require('jquery')
 riot     = require('riot')
 controls = require('../views/marx-js-controls.js')
 ipsum = require('../views/marx-js-ipsum.js')
+notifications = require('../views/marx-js-notifications.js')
 simple = require('../views/simple-open-controls.js')
 advanced = require('../views/advanced-open-controls.js')
 
@@ -29,11 +30,17 @@ class Marx
     this.create_controls()
 
   create_controls: ->
-    $('body').append "<marx-js-controls></marx-js-controls>"
+    $('body').append """
+      <marx-js-notifications></marx-js-notifications>
+      <marx-js-controls></marx-js-controls>
+    """
     riot.mount 'marx-js-controls',
       settings: this.settings,
       advanced: (['standard', 'minimum'].indexOf(this.settings.controls) is -1)
       toggle_advanced: this.settings.controls is 'toggle-advanced'
+
+    tags = riot.mount 'marx-js-notifications', { position: this.settings.position }
+    this.notifications = tags[0]
 
     this.$el = $('marx-js-controls')
 
@@ -76,17 +83,17 @@ class Marx
     marx.effected?.inputs = 0
     $.each $("#{marx.settings.form} input"), (i, input) =>
       unless $(input).val() isnt "" or $(input).hasClass 'no-populate'
-        obj = marx.get_random()
+        obj     = marx.get_random()
         brother = JSON.parse(obj.brother)
-        movie = JSON.parse(obj.movie)
+        movie   = JSON.parse(obj.movie)
+        rand    = Math.random()
+        year    = movie.year.toString()
         strings = [brother.name, movie.name, obj.first_name, obj.last_name, obj.description].filter () -> true
         value = switch $(input).attr('type')
           when 'number' then movie.year
           when 'email' then "#{brother.name.toLowerCase().replace(/\s/g, '')}@#{movie.name.toLowerCase().replace(/\s/g, '')}.com"
           when 'url' then "http://#{movie.name.toLowerCase().replace(/\s/g, '')}.com"
           when 'date'
-            rand = Math.random()
-            year = movie.year.toString()
             "#{year}-0#{year.substr(Math.floor(rand*4), 1)}-2#{year.substr(Math.floor(rand*4), 1)}"
           else
             str = strings[Math.floor(Math.random() * strings.length)]
@@ -174,18 +181,31 @@ class Marx
           .attr('data-marx-hidden', true)
 
   trigger_notifications: ->
-    num = 0
+    this.notifications.alerts = []
+
     $.each this.effected, (key, val) =>
       unless val is 0
         el = key.replace(/_/, ' ')
-        $note = $("<p class='marx-notification'>#{val} #{el} elements were altered</p>")
-        @$el.append $note
-        $note
-          .css('top', "#{20 + (num*50)}px")
-          .delay(5000 + (num*50))
-          .slideUp 'fast', -> $note.remove()
-        num += 1
-        @effected[key] = 0
+        @notifications.alerts.push {count: val, element: el}
+      @effected[key] = 0
+    this.notifications.update()
+    this.position_notifications()
+
+  position_notifications: ->
+    notification_bottom = ($('marx-js-controls').height() + 40) - $('marx-js-notifications').height()
+    $('marx-js-notifications')
+      .hide()
+      .slideDown('fast')
+
+    $('marx-js-notifications').css
+      bottom: notification_bottom
+      right: $('marx-js-controls').width()
+
+    setTimeout =>
+      $('notification').slideUp 'fast', =>
+        @notifications.alerts = null
+        @notifications.update()
+    , 5000
 
   toggle_description: ($link) ->
     $parent = $link.parent('.marx-js-group')
@@ -205,37 +225,7 @@ class Marx
 
   get_random: () -> @marx_json[Math.floor(Math.random() * @marx_json.length)]
 
-    # switch this.settings.controls
-    #   when 'standard'
-    #     this.add_standard_controls()
-        # this.$('a.open-controls').click (e) => @toggle_controls(e)
-      # when 'advanced', 'toggle-advanced'
-      #   this.add_standard_controls()
-      #   this.add_advanced_controls()
-      #   this.$('a.open-controls').click (e) => @toggle_controls(e)
-      # when 'minimum'
-      #   this.$('a.open-controls').click (e) => @populate_whole_form(e)
-      # when 'toggle-all'
-      #   this.add_standard_controls()
-      #   this.add_advanced_controls()
-      #   this.$('a.standard-controls').click (e) =>
-      #     $('p.marx-notification').remove()
-      #     @$('.marx-standard-controls').toggle()
-      #     @$('.marx-advanced-controls').hide()
-      #     false
-      #   this.$('a.advanced-controls').click (e) =>
-      #     $('p.marx-notification').remove()
-      #     @$('.marx-advanced-controls').toggle()
-      #     @$('.marx-standard-controls').hide()
-      #     false
-
-      #   this.$('a.quick-populate').click (e) =>
-      #     @$('.marx-standard-controls').hide()
-      #     @$('.marx-advanced-controls').hide()
-      #     @populate_whole_form(e)
-
   $: (el) -> this.$el.find(el)
-
 
   method_by_keys: ->
     {
@@ -263,21 +253,23 @@ class Marx
            EVENTS
   =====================###
   popluate_selected_fields: (e) ->
-    switch $(e.target).attr('class')
+    fn = switch $(e.target).attr('class')
       when 'populate-textareas'
-        this.populate_textareas()
+        this.populate_textareas
       when 'populate-inputs'
-        this.populate_inputs()
+        this.populate_inputs
       when 'populate-checkboxes'
-        this.populate_checkboxes()
+        this.populate_checkboxes
       when 'populate-radios'
-        this.populate_radios()
+        this.populate_radios
       when 'populate-selects'
-        this.populate_selects()
+        this.populate_selects
       else
-        this.populate_whole_form()
+        this.populate_whole_form
 
-    this.trigger_notifications()
+    $.when(fn()).then =>
+      @trigger_notifications()
+
     false
 
   advanced_actions: (e) ->

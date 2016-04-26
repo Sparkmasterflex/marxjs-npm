@@ -1,4 +1,4 @@
-var $, Marx, advanced, controls, ipsum, riot, simple,
+var $, Marx, advanced, controls, ipsum, notifications, riot, simple,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 $ = require('jquery');
@@ -8,6 +8,8 @@ riot = require('riot');
 controls = require('../views/marx-js-controls.js');
 
 ipsum = require('../views/marx-js-ipsum.js');
+
+notifications = require('../views/marx-js-notifications.js');
 
 simple = require('../views/simple-open-controls.js');
 
@@ -46,13 +48,17 @@ Marx = (function() {
   };
 
   Marx.prototype.create_controls = function() {
-    var open_template;
-    $('body').append("<marx-js-controls></marx-js-controls>");
+    var open_template, tags;
+    $('body').append("<marx-js-notifications></marx-js-notifications>\n<marx-js-controls></marx-js-controls>");
     riot.mount('marx-js-controls', {
       settings: this.settings,
       advanced: ['standard', 'minimum'].indexOf(this.settings.controls) === -1,
       toggle_advanced: this.settings.controls === 'toggle-advanced'
     });
+    tags = riot.mount('marx-js-notifications', {
+      position: this.settings.position
+    });
+    this.notifications = tags[0];
     this.$el = $('marx-js-controls');
     open_template = this.settings.controls === 'toggle-all' ? 'advanced-open-controls' : 'simple-open-controls';
     riot.mount('marx-js-open', open_template, {
@@ -119,6 +125,8 @@ Marx = (function() {
           obj = marx.get_random();
           brother = JSON.parse(obj.brother);
           movie = JSON.parse(obj.movie);
+          rand = Math.random();
+          year = movie.year.toString();
           strings = [brother.name, movie.name, obj.first_name, obj.last_name, obj.description].filter(function() {
             return true;
           });
@@ -131,8 +139,6 @@ Marx = (function() {
               case 'url':
                 return "http://" + (movie.name.toLowerCase().replace(/\s/g, '')) + ".com";
               case 'date':
-                rand = Math.random();
-                year = movie.year.toString();
                 return year + "-0" + (year.substr(Math.floor(rand * 4), 1)) + "-2" + (year.substr(Math.floor(rand * 4), 1));
               default:
                 str = strings[Math.floor(Math.random() * strings.length)];
@@ -259,23 +265,40 @@ Marx = (function() {
   };
 
   Marx.prototype.trigger_notifications = function() {
-    var num;
-    num = 0;
-    return $.each(this.effected, (function(_this) {
+    this.notifications.alerts = [];
+    $.each(this.effected, (function(_this) {
       return function(key, val) {
-        var $note, el;
+        var el;
         if (val !== 0) {
           el = key.replace(/_/, ' ');
-          $note = $("<p class='marx-notification'>" + val + " " + el + " elements were altered</p>");
-          _this.$el.append($note);
-          $note.css('top', (20 + (num * 50)) + "px").delay(5000 + (num * 50)).slideUp('fast', function() {
-            return $note.remove();
+          _this.notifications.alerts.push({
+            count: val,
+            element: el
           });
-          num += 1;
-          return _this.effected[key] = 0;
         }
+        return _this.effected[key] = 0;
       };
     })(this));
+    this.notifications.update();
+    return this.position_notifications();
+  };
+
+  Marx.prototype.position_notifications = function() {
+    var notification_bottom;
+    notification_bottom = ($('marx-js-controls').height() + 40) - $('marx-js-notifications').height();
+    $('marx-js-notifications').hide().slideDown('fast');
+    $('marx-js-notifications').css({
+      bottom: notification_bottom,
+      right: $('marx-js-controls').width()
+    });
+    return setTimeout((function(_this) {
+      return function() {
+        return $('notification').slideUp('fast', function() {
+          _this.notifications.alerts = null;
+          return _this.notifications.update();
+        });
+      };
+    })(this), 5000);
   };
 
   Marx.prototype.toggle_description = function($link) {
@@ -334,26 +357,28 @@ Marx = (function() {
    */
 
   Marx.prototype.popluate_selected_fields = function(e) {
-    switch ($(e.target).attr('class')) {
-      case 'populate-textareas':
-        this.populate_textareas();
-        break;
-      case 'populate-inputs':
-        this.populate_inputs();
-        break;
-      case 'populate-checkboxes':
-        this.populate_checkboxes();
-        break;
-      case 'populate-radios':
-        this.populate_radios();
-        break;
-      case 'populate-selects':
-        this.populate_selects();
-        break;
-      default:
-        this.populate_whole_form();
-    }
-    this.trigger_notifications();
+    var fn;
+    fn = (function() {
+      switch ($(e.target).attr('class')) {
+        case 'populate-textareas':
+          return this.populate_textareas;
+        case 'populate-inputs':
+          return this.populate_inputs;
+        case 'populate-checkboxes':
+          return this.populate_checkboxes;
+        case 'populate-radios':
+          return this.populate_radios;
+        case 'populate-selects':
+          return this.populate_selects;
+        default:
+          return this.populate_whole_form;
+      }
+    }).call(this);
+    $.when(fn()).then((function(_this) {
+      return function() {
+        return _this.trigger_notifications();
+      };
+    })(this));
     return false;
   };
 

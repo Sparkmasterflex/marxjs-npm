@@ -1,5 +1,6 @@
 @import "mixins"
 
+marx-js-notifications,
 marx-js-controls,
 marx-js-ipsum
   font-family Arial, sans-serif
@@ -13,10 +14,13 @@ marx-js-ipsum
     font-size 24px
     margin-bottom 15px
 
+marx-js-notifications,
 marx-js-controls
   position fixed
   z-index 2000
   display flex
+
+marx-js-controls
   background #f6f6f6
   box-shadow(0, 0, 8px, rgba(#000, 0.7))
 
@@ -65,6 +69,19 @@ marx-js-ipsum
     background-color #333
     text-align center
     text-decoration none
+
+
+marx-js-notifications
+  flex-direction column
+
+  notification
+    display block
+    padding 3px 5px
+    margin-bottom 15px
+    background-color rgba(#333, 0.8)
+    border 1px solid #333
+    color #ddd
+    border-radius(3px)
 
 
 standard-controls,
@@ -212,45 +229,45 @@ $keyframe-name = load8
 //========================\\
 //    marx positioning    \\
 //========================\\
-marx-js-controls
-  // both bottom
-  &.marx-bottom-right,
-  &.marx-bottom-left
+// both bottom
+marx-js-controls.marx-bottom-right,
+marx-js-controls.marx-bottom-left
+  bottom 0
+  padding-bottom 40px
+  border-top 1px solid #ddd
+
+  marx-js-open
     bottom 0
-    padding-bottom 40px
-    border-top 1px solid #ddd
 
-    marx-js-open
-      bottom 0
+// both right
+marx-js-controls.marx-top-right,
+marx-js-controls.marx-bottom-right
+  right 0
+  padding-bottom 50px
+  border-left 1px solid #ddd
 
-  // both right
-  &.marx-top-right,
-  &.marx-bottom-right
+  marx-js-open
     right 0
-    padding-bottom 50px
-    border-left 1px solid #ddd
 
-    marx-js-open
-      right 0
+// both top
+marx-js-controls.marx-top-right,
+marx-js-controls.marx-top-left
+  top 0
+  padding-top 40px
+  border-bottom 1px solid #ddd
 
-  // both top
-  &.marx-top-right,
-  &.marx-top-left
+  marx-js-open
     top 0
-    padding-top 40px
-    border-bottom 1px solid #ddd
 
-    marx-js-open
-      top 0
+// both left
+marx-js-controls.marx-top-left,
+marx-js-controls.marx-bottom-left
+  left 0
+  border-right 1px solid #ddd
 
-  // both left
-  &.marx-top-left,
-  &.marx-bottom-left
+  marx-js-open
     left 0
-    border-right 1px solid #ddd
 
-    marx-js-open
-      left 0
 
 marx-js-ipsum
   // both bottom

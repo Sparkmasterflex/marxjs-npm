@@ -13,7 +13,6 @@ this.activate_controls = function(e) {
   if (opts.controls === "minimum") {
     marx.populate_whole_form();
   } else {
-    console.log('hello?');
     $('standard-controls').slideToggle('fast');
     if (opts.controls === 'advanced') {
       $('advanced-controls').slideToggle('fast');
