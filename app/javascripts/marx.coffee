@@ -93,6 +93,8 @@ class Marx
           when 'number' then movie.year
           when 'email' then "#{brother.name.toLowerCase().replace(/\s/g, '')}@#{movie.name.toLowerCase().replace(/\s/g, '')}.com"
           when 'url' then "http://#{movie.name.toLowerCase().replace(/\s/g, '')}.com"
+          when 'tel'
+            Math.floor(Math.random() * 10000000000).toString()
           when 'date'
             "#{year}-0#{year.substr(Math.floor(rand*4), 1)}-2#{year.substr(Math.floor(rand*4), 1)}"
           else

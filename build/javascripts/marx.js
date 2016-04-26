@@ -138,6 +138,8 @@ Marx = (function() {
                 return (brother.name.toLowerCase().replace(/\s/g, '')) + "@" + (movie.name.toLowerCase().replace(/\s/g, '')) + ".com";
               case 'url':
                 return "http://" + (movie.name.toLowerCase().replace(/\s/g, '')) + ".com";
+              case 'tel':
+                return Math.floor(Math.random() * 10000000000).toString();
               case 'date':
                 return year + "-0" + (year.substr(Math.floor(rand * 4), 1)) + "-2" + (year.substr(Math.floor(rand * 4), 1));
               default:
