@@ -7,13 +7,13 @@ Marx = require('./marx');
 
 $(function() {
   return window.marx = new Marx({
-    controls: 'advanced'
+    controls: 'toggle-all'
   });
 });
 
 },{"./marx":2,"jquery":8}],2:[function(require,module,exports){
 var $, Marx, advanced, controls, ipsum, notifications, riot, simple,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  bind1 = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 $ = require('jquery');
 
@@ -40,8 +40,8 @@ Marx = (function() {
   };
 
   function Marx(options) {
-    this.toggle_advanced = bind(this.toggle_advanced, this);
-    this.populate_whole_form = bind(this.populate_whole_form, this);
+    this.toggle_advanced = bind1(this.toggle_advanced, this);
+    this.populate_whole_form = bind1(this.populate_whole_form, this);
     this._url = "http://marxjs.com";
     $.getJSON(this._url + "/characters", (function(_this) {
       return function(data) {
@@ -55,6 +55,20 @@ Marx = (function() {
     $.extend(this.settings, options);
     this.methods = this.method_by_keys();
     this.effected = this.default_counts();
+    document.addEventListener('keypress', (function(_this) {
+      return function(e) {
+        var char;
+        char = String.fromCharCode(e.keyCode);
+        if (e.shiftKey && char === "!") {
+          _this.open_controls();
+        }
+        if (_this.settings.controls === 'toggle-all' || (_this.settings.controls === 'toggle-advanced' && $('standard-controls').is(":visible"))) {
+          if (e.shiftKey && char === "@") {
+            return _this.open_advanced_controls();
+          }
+        }
+      };
+    })(this));
     if (this.settings.onload) {
       this.auto_populate();
     }
@@ -455,6 +469,63 @@ Marx = (function() {
     return false;
   };
 
+  Marx.prototype.toggle_key_bindings = function(bind) {
+    if (bind) {
+      return document.addEventListener("keypress", this.trigger_action);
+    } else {
+      return document.removeEventListener('keypress', this.trigger_action);
+    }
+  };
+
+  Marx.prototype.trigger_action = function(e) {
+    var char, trigger;
+    char = String.fromCharCode(e.keyCode);
+    trigger = (function() {
+      switch (char) {
+        case '1':
+          return "populate-whole-form";
+        case '2':
+          return "populate-textareas";
+        case '3':
+          return "populate-inputs";
+        case '4':
+          return "populate-checkboxes";
+        case '5':
+          return "populate-radios";
+        case '6':
+          return "populate-selects";
+        case '7':
+          return "clear-form";
+        case '8':
+          return "populate-submit";
+        case '9':
+          return "show-hidden";
+        case '0':
+          return "expand-select";
+        case '$':
+          return "random-image";
+        case '%':
+          return "generate-ipsum";
+      }
+    })();
+    if (trigger != null) {
+      return document.querySelector("a." + trigger).click();
+    }
+  };
+
+  Marx.prototype.open_controls = function() {
+    $('standard-controls').slideToggle('fast', function() {
+      return marx.toggle_key_bindings($('standard-controls').is(":visible"));
+    });
+    if (this.settings.controls === 'advanced') {
+      return $('advanced-controls').slideToggle('fast');
+    }
+  };
+
+  Marx.prototype.open_advanced_controls = function() {
+    return $('advanced-controls').slideToggle('fast');
+  };
+
   return Marx;
 
 })();
@@ -505,44 +576,56 @@ riot.tag2('marx-js-controls', '<link rel="stylesheet" href="build/stylesheets/ba
 this.standard = [
   {
     action: 'populate-whole-form',
-    label: 'Populate Whole Form'
+    label: 'Populate Whole Form',
+    key: 1
   }, {
     action: 'populate-textareas',
-    label: 'Populate TextAreas'
+    label: 'Populate TextAreas',
+    key: 2
   }, {
     action: 'populate-inputs',
-    label: 'Populate Inputs'
+    label: 'Populate Inputs',
+    key: 3
   }, {
     action: 'populate-checkboxes',
-    label: 'Populate Check Boxes'
+    label: 'Populate Check Boxes',
+    key: 4
   }, {
     action: 'populate-radios',
-    label: 'Populate Radio Buttons'
+    label: 'Populate Radio Buttons',
+    key: 5
   }, {
     action: 'populate-selects',
-    label: 'Populate Select Boxes'
+    label: 'Populate Select Boxes',
+    key: 6
   }
 ];
 
 this.advanced = [
   {
     action: 'clear-form',
-    label: 'Clear Form'
+    label: 'Clear Form',
+    key: 7
   }, {
     action: 'populate-submit',
-    label: 'Populate and Submit'
+    label: 'Populate and Submit',
+    key: 8
   }, {
     action: 'show-hidden',
-    label: 'Show Hidden Fields'
+    label: 'Show Hidden Fields',
+    key: 9
   }, {
     action: 'expand-select',
-    label: 'Expand Select Boxes'
+    label: 'Expand Select Boxes',
+    key: 0
   }, {
     action: 'random-image',
-    label: 'Download Random Image'
+    label: 'Download Random Image',
+    key: '$'
   }, {
     action: 'generate-ipsum',
     label: "Generate Ipsum",
+    key: '%',
     html: 'ipsum'
   }
 ];
@@ -624,10 +707,7 @@ this.activate_controls = function(e) {
   if (opts.controls === "minimum") {
     marx.populate_whole_form();
   } else {
-    $('standard-controls').slideToggle('fast');
-    if (opts.controls === 'advanced') {
-      $('advanced-controls').slideToggle('fast');
-    }
+    marx.open_controls();
   }
   return false;
 };

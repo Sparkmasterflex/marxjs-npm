@@ -6,6 +6,6 @@ Marx = require('./marx');
 
 $(function() {
   return window.marx = new Marx({
-    controls: 'advanced'
+    controls: 'toggle-all'
   });
 });

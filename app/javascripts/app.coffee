@@ -3,5 +3,5 @@ Marx = require('./marx')
 
 $ ->
   window.marx = new Marx(
-    controls: 'advanced'
+    controls: 'toggle-all'
   )

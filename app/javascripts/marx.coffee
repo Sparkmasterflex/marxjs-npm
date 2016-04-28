@@ -25,6 +25,12 @@ class Marx
     $.extend this.settings, options
     this.methods = this.method_by_keys()
     this.effected = this.default_counts()
+    document.addEventListener 'keypress', (e) =>
+      char = String.fromCharCode(e.keyCode)
+      @open_controls() if e.shiftKey and char is "!"
+      # if ['toggle-all', 'toggle-advanced'].indexOf(@settings.controls) >= 0
+      if @settings.controls is 'toggle-all' or (@settings.controls is 'toggle-advanced' and $('standard-controls').is(":visible"))
+        @open_advanced_controls() if e.shiftKey and char is "@"
 
     this.auto_populate() if this.settings.onload
     this.create_controls()
@@ -310,5 +316,40 @@ class Marx
       .html(txt)
     @$('advanced-controls').toggle()
     false
+
+  toggle_key_bindings: (bind) ->
+    if bind
+      document.addEventListener "keypress", this.trigger_action
+    else
+      document.removeEventListener 'keypress', this.trigger_action
+
+
+  trigger_action: (e) ->
+    char = String.fromCharCode(e.keyCode)
+    trigger = switch char
+      when '1' then "populate-whole-form"
+      when '2' then "populate-textareas"
+      when '3' then "populate-inputs"
+      when '4' then "populate-checkboxes"
+      when '5' then "populate-radios"
+      when '6' then "populate-selects"
+      when '7' then "clear-form"
+      when '8' then "populate-submit"
+      when '9' then "show-hidden"
+      when '0' then "expand-select"
+      when '$' then "random-image"
+      when '%' then "generate-ipsum"
+    if trigger?
+      document.querySelector("a.#{trigger}").click()
+
+  open_controls: ->
+    $('standard-controls').slideToggle 'fast', ->
+      marx.toggle_key_bindings $('standard-controls').is(":visible")
+    if this.settings.controls is 'advanced'
+      $('advanced-controls').slideToggle 'fast'
+
+  open_advanced_controls: ->
+    $('advanced-controls').slideToggle 'fast'
+
 
 module.exports = Marx

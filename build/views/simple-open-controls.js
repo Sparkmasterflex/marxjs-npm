@@ -13,10 +13,7 @@ this.activate_controls = function(e) {
   if (opts.controls === "minimum") {
     marx.populate_whole_form();
   } else {
-    $('standard-controls').slideToggle('fast');
-    if (opts.controls === 'advanced') {
-      $('advanced-controls').slideToggle('fast');
-    }
+    marx.open_controls();
   }
   return false;
 };

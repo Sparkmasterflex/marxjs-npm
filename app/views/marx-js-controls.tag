@@ -4,21 +4,21 @@ riot = require('riot')
   <marx-js-open></marx-js-open>
   <script>
     this.standard = [
-      { action: 'populate-whole-form', label: 'Populate Whole Form'    },
-      { action: 'populate-textareas',  label: 'Populate TextAreas'     },
-      { action: 'populate-inputs',     label: 'Populate Inputs'        },
-      { action: 'populate-checkboxes', label: 'Populate Check Boxes'   },
-      { action: 'populate-radios',     label: 'Populate Radio Buttons' },
-      { action: 'populate-selects',    label: 'Populate Select Boxes'  }
+      { action: 'populate-whole-form', label: 'Populate Whole Form',    key: 1 },
+      { action: 'populate-textareas',  label: 'Populate TextAreas',     key: 2 },
+      { action: 'populate-inputs',     label: 'Populate Inputs',        key: 3 },
+      { action: 'populate-checkboxes', label: 'Populate Check Boxes',   key: 4 },
+      { action: 'populate-radios',     label: 'Populate Radio Buttons', key: 5 },
+      { action: 'populate-selects',    label: 'Populate Select Boxes',  key: 6 }
     ]
 
     this.advanced = [
-      { action: 'clear-form',      label: 'Clear Form'                    },
-      { action: 'populate-submit', label: 'Populate and Submit'           },
-      { action: 'show-hidden',     label: 'Show Hidden Fields'            },
-      { action: 'expand-select',   label: 'Expand Select Boxes'           },
-      { action: 'random-image',    label: 'Download Random Image'         },
-      { action: 'generate-ipsum',  label: "Generate Ipsum", html: 'ipsum' }
+      { action: 'clear-form',      label: 'Clear Form',            key: 7   },
+      { action: 'populate-submit', label: 'Populate and Submit',   key: 8   },
+      { action: 'show-hidden',     label: 'Show Hidden Fields',    key: 9   },
+      { action: 'expand-select',   label: 'Expand Select Boxes',   key: 0   },
+      { action: 'random-image',    label: 'Download Random Image', key: '$' },
+      { action: 'generate-ipsum',  label: "Generate Ipsum",        key: '%', html: 'ipsum' }
     ]
   </script>
 

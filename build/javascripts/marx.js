@@ -1,5 +1,5 @@
 var $, Marx, advanced, controls, ipsum, notifications, riot, simple,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  bind1 = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 $ = require('jquery');
 
@@ -26,8 +26,8 @@ Marx = (function() {
   };
 
   function Marx(options) {
-    this.toggle_advanced = bind(this.toggle_advanced, this);
-    this.populate_whole_form = bind(this.populate_whole_form, this);
+    this.toggle_advanced = bind1(this.toggle_advanced, this);
+    this.populate_whole_form = bind1(this.populate_whole_form, this);
     this._url = "http://marxjs.com";
     $.getJSON(this._url + "/characters", (function(_this) {
       return function(data) {
@@ -41,6 +41,20 @@ Marx = (function() {
     $.extend(this.settings, options);
     this.methods = this.method_by_keys();
     this.effected = this.default_counts();
+    document.addEventListener('keypress', (function(_this) {
+      return function(e) {
+        var char;
+        char = String.fromCharCode(e.keyCode);
+        if (e.shiftKey && char === "!") {
+          _this.open_controls();
+        }
+        if (_this.settings.controls === 'toggle-all' || (_this.settings.controls === 'toggle-advanced' && $('standard-controls').is(":visible"))) {
+          if (e.shiftKey && char === "@") {
+            return _this.open_advanced_controls();
+          }
+        }
+      };
+    })(this));
     if (this.settings.onload) {
       this.auto_populate();
     }
@@ -439,6 +453,63 @@ Marx = (function() {
     $link.toggleClass('opened').html(txt);
     this.$('advanced-controls').toggle();
     return false;
+  };
+
+  Marx.prototype.toggle_key_bindings = function(bind) {
+    if (bind) {
+      return document.addEventListener("keypress", this.trigger_action);
+    } else {
+      return document.removeEventListener('keypress', this.trigger_action);
+    }
+  };
+
+  Marx.prototype.trigger_action = function(e) {
+    var char, trigger;
+    char = String.fromCharCode(e.keyCode);
+    trigger = (function() {
+      switch (char) {
+        case '1':
+          return "populate-whole-form";
+        case '2':
+          return "populate-textareas";
+        case '3':
+          return "populate-inputs";
+        case '4':
+          return "populate-checkboxes";
+        case '5':
+          return "populate-radios";
+        case '6':
+          return "populate-selects";
+        case '7':
+          return "clear-form";
+        case '8':
+          return "populate-submit";
+        case '9':
+          return "show-hidden";
+        case '0':
+          return "expand-select";
+        case '$':
+          return "random-image";
+        case '%':
+          return "generate-ipsum";
+      }
+    })();
+    if (trigger != null) {
+      return document.querySelector("a." + trigger).click();
+    }
+  };
+
+  Marx.prototype.open_controls = function() {
+    $('standard-controls').slideToggle('fast', function() {
+      return marx.toggle_key_bindings($('standard-controls').is(":visible"));
+    });
+    if (this.settings.controls === 'advanced') {
+      return $('advanced-controls').slideToggle('fast');
+    }
+  };
+
+  Marx.prototype.open_advanced_controls = function() {
+    return $('advanced-controls').slideToggle('fast');
   };
 
   return Marx;
