@@ -1,10 +1,10 @@
-$        = require('jquery')
-riot     = require('riot')
-controls = require('../views/marx-js-controls.js')
-ipsum = require('../views/marx-js-ipsum.js')
+$             = require('jquery')
+riot          = require('riot')
+controls      = require('../views/marx-js-controls.js')
+ipsum         = require('../views/marx-js-ipsum.js')
 notifications = require('../views/marx-js-notifications.js')
-simple = require('../views/simple-open-controls.js')
-advanced = require('../views/advanced-open-controls.js')
+simple        = require('../views/simple-open-controls.js')
+advanced      = require('../views/advanced-open-controls.js')
 
 class Marx
   settings:
@@ -25,12 +25,6 @@ class Marx
     $.extend this.settings, options
     this.methods = this.method_by_keys()
     this.effected = this.default_counts()
-    document.addEventListener 'keypress', (e) =>
-      char = String.fromCharCode(e.keyCode)
-      @open_controls() if e.shiftKey and char is "!"
-      # if ['toggle-all', 'toggle-advanced'].indexOf(@settings.controls) >= 0
-      if @settings.controls is 'toggle-all' or (@settings.controls is 'toggle-advanced' and $('standard-controls').is(":visible"))
-        @open_advanced_controls() if e.shiftKey and char is "@"
 
     this.auto_populate() if this.settings.onload
     this.create_controls()
@@ -58,8 +52,50 @@ class Marx
 
     this.$('standard-controls control a').click (e) => @popluate_selected_fields(e)
 
+    this.setup_control_listeners()
+
+
+  setup_control_listeners: ->
+    # using mouse to open controls
     this.set_toggle_advanced() if this.settings.controls is 'toggle-advanced'
     this.$('advanced-controls control a').click (e) => @advanced_actions(e)
+
+    # open controls with keyboard
+    document.addEventListener 'keypress', (e) =>
+      char = String.fromCharCode(e.keyCode)
+      # minimum
+      # ==> shft+1 populate form
+      #
+      # standard
+      # advanced
+      # ==> shft+2 toggle controls
+      #
+      # toggle-advanced
+      # ==> shft+2 toggle standard controls
+      # ====> closes both advanced (if open) and standard
+      # ==> shft+3 toggle advanced controls
+      # ====> if standard open
+      #
+      # toggle-all
+      # ==> shft+1 populate form
+      # ==> shft+2 toggle standard controls
+      # ==> shft+3 toggle advanced controls
+      # if ['minimum', 'toggle-all'].indexOf(@settings.controls) >= 0
+      @populate_whole_form() if e.shiftKey and char is '!'
+
+      if @settings.controls isnt 'minimum'
+        @open_controls() if e.shiftKey and char is "@"
+        if @settings.controls is 'toggle-all' and $('advanced-controls').is(':visible')
+          $('advanced-controls').hide()
+        else if @settings.controls is 'advanced'
+          @open_advanced_controls()
+
+      if e.shiftKey and char is "#"
+        if @settings.controls is 'toggle-advanced' and $('standard-controls').is(":visible")
+          @open_advanced_controls()
+        else if @settings.controls is 'toggle-all'
+          @open_advanced_controls()
+          $('standard-controls').hide()
 
   set_toggle_advanced: ->
     this.$('advanced-controls').hide()
@@ -323,7 +359,6 @@ class Marx
     else
       document.removeEventListener 'keypress', this.trigger_action
 
-
   trigger_action: (e) ->
     char = String.fromCharCode(e.keyCode)
     trigger = switch char
@@ -342,14 +377,21 @@ class Marx
     if trigger?
       document.querySelector("a.#{trigger}").click()
 
-  open_controls: ->
-    $('standard-controls').slideToggle 'fast', ->
-      marx.toggle_key_bindings $('standard-controls').is(":visible")
-    if this.settings.controls is 'advanced'
-      $('advanced-controls').slideToggle 'fast'
+  open_controls: (e) =>
+    $('standard-controls').slideToggle 'fast', =>
+      @toggle_key_bindings $('standard-controls').is(":visible")
+      @open_advanced_controls(false) if @settings.controls is 'toggle-advanced'
+    false
 
-  open_advanced_controls: ->
-    $('advanced-controls').slideToggle 'fast'
+
+  open_advanced_controls: (open=null) ->
+    if open is true
+      $('advanced-controls').slideDown 'fast'
+    else if open is false
+      $('advanced-controls').slideUp 'fast'
+    else
+      $('advanced-controls').slideToggle 'fast'
+    false
 
 
 module.exports = Marx

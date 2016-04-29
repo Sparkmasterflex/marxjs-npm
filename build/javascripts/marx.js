@@ -26,6 +26,7 @@ Marx = (function() {
   };
 
   function Marx(options) {
+    this.open_controls = bind1(this.open_controls, this);
     this.toggle_advanced = bind1(this.toggle_advanced, this);
     this.populate_whole_form = bind1(this.populate_whole_form, this);
     this._url = "http://marxjs.com";
@@ -41,20 +42,6 @@ Marx = (function() {
     $.extend(this.settings, options);
     this.methods = this.method_by_keys();
     this.effected = this.default_counts();
-    document.addEventListener('keypress', (function(_this) {
-      return function(e) {
-        var char;
-        char = String.fromCharCode(e.keyCode);
-        if (e.shiftKey && char === "!") {
-          _this.open_controls();
-        }
-        if (_this.settings.controls === 'toggle-all' || (_this.settings.controls === 'toggle-advanced' && $('standard-controls').is(":visible"))) {
-          if (e.shiftKey && char === "@") {
-            return _this.open_advanced_controls();
-          }
-        }
-      };
-    })(this));
     if (this.settings.onload) {
       this.auto_populate();
     }
@@ -83,12 +70,43 @@ Marx = (function() {
         return _this.popluate_selected_fields(e);
       };
     })(this));
+    return this.setup_control_listeners();
+  };
+
+  Marx.prototype.setup_control_listeners = function() {
     if (this.settings.controls === 'toggle-advanced') {
       this.set_toggle_advanced();
     }
-    return this.$('advanced-controls control a').click((function(_this) {
+    this.$('advanced-controls control a').click((function(_this) {
       return function(e) {
         return _this.advanced_actions(e);
+      };
+    })(this));
+    return document.addEventListener('keypress', (function(_this) {
+      return function(e) {
+        var char;
+        char = String.fromCharCode(e.keyCode);
+        if (e.shiftKey && char === '!') {
+          _this.populate_whole_form();
+        }
+        if (_this.settings.controls !== 'minimum') {
+          if (e.shiftKey && char === "@") {
+            _this.open_controls();
+          }
+          if (_this.settings.controls === 'toggle-all' && $('advanced-controls').is(':visible')) {
+            $('advanced-controls').hide();
+          } else if (_this.settings.controls === 'advanced') {
+            _this.open_advanced_controls();
+          }
+        }
+        if (e.shiftKey && char === "#") {
+          if (_this.settings.controls === 'toggle-advanced' && $('standard-controls').is(":visible")) {
+            return _this.open_advanced_controls();
+          } else if (_this.settings.controls === 'toggle-all') {
+            _this.open_advanced_controls();
+            return $('standard-controls').hide();
+          }
+        }
       };
     })(this));
   };
@@ -499,17 +517,30 @@ Marx = (function() {
     }
   };
 
-  Marx.prototype.open_controls = function() {
-    $('standard-controls').slideToggle('fast', function() {
-      return marx.toggle_key_bindings($('standard-controls').is(":visible"));
-    });
-    if (this.settings.controls === 'advanced') {
-      return $('advanced-controls').slideToggle('fast');
-    }
+  Marx.prototype.open_controls = function(e) {
+    $('standard-controls').slideToggle('fast', (function(_this) {
+      return function() {
+        _this.toggle_key_bindings($('standard-controls').is(":visible"));
+        if (_this.settings.controls === 'toggle-advanced') {
+          return _this.open_advanced_controls(false);
+        }
+      };
+    })(this));
+    return false;
   };
 
-  Marx.prototype.open_advanced_controls = function() {
-    return $('advanced-controls').slideToggle('fast');
+  Marx.prototype.open_advanced_controls = function(open) {
+    if (open == null) {
+      open = null;
+    }
+    if (open === true) {
+      $('advanced-controls').slideDown('fast');
+    } else if (open === false) {
+      $('advanced-controls').slideUp('fast');
+    } else {
+      $('advanced-controls').slideToggle('fast');
+    }
+    return false;
   };
 
   return Marx;
