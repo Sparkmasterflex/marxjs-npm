@@ -6,6 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "files": [
+    "marx.js",
+    "build/base.css"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Sparkmasterflex/marx-js.git"

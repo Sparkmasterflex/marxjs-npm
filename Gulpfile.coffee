@@ -1,14 +1,16 @@
-gulp = require('gulp')
-gutil = require('gulp-util')
-stylus = require('gulp-stylus')
-riot   = require('gulp-riot')
-coffee   = require('gulp-coffee')
-rename = require('gulp-rename')
-connect = require('gulp-connect')
-source = require('vinyl-source-stream')
+gulp       = require('gulp')
+gutil      = require('gulp-util')
+stylus     = require('gulp-stylus')
+riot       = require('gulp-riot')
+coffee     = require('gulp-coffee')
+rename     = require('gulp-rename')
+connect    = require('gulp-connect')
+source     = require('vinyl-source-stream')
 browserify = require('browserify')
 sourcemaps = require('gulp-sourcemaps')
-uglify = require('gulp-uglify')
+uglify     = require('gulp-uglify')
+concat     = require('gulp-concat')
+rename     = require('gulp-rename')
 
 gulp.task 'stylus', ->
   gulp.src("./app/stylesheets/*.styl")
@@ -52,5 +54,12 @@ gulp.task 'connect', ->
   connect.server
     root: '.',
     livereload: true
+
+gulp.task 'build', ->
+  return gulp.src('./build/**/*.js')
+    .pipe(concat('marx.js'))
+    .pipe(uglify())
+    .pipe(gulp.dest('./'));
+
 
 gulp.task 'default', ['stylus', 'coffee', 'riot', 'browserify', 'connect', 'watch']

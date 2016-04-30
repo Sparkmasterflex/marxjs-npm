@@ -54,33 +54,15 @@ class Marx
 
     this.setup_control_listeners()
 
-
   setup_control_listeners: ->
     # using mouse to open controls
-    this.set_toggle_advanced() if this.settings.controls is 'toggle-advanced'
+    this.$('advanced-controls').hide() if this.settings.controls is 'toggle-advanced'
     this.$('advanced-controls control a').click (e) => @advanced_actions(e)
 
     # open controls with keyboard
     document.addEventListener 'keypress', (e) =>
       char = String.fromCharCode(e.keyCode)
-      # minimum
-      # ==> shft+1 populate form
-      #
-      # standard
-      # advanced
-      # ==> shft+2 toggle controls
-      #
-      # toggle-advanced
-      # ==> shft+2 toggle standard controls
-      # ====> closes both advanced (if open) and standard
-      # ==> shft+3 toggle advanced controls
-      # ====> if standard open
-      #
-      # toggle-all
-      # ==> shft+1 populate form
-      # ==> shft+2 toggle standard controls
-      # ==> shft+3 toggle advanced controls
-      # if ['minimum', 'toggle-all'].indexOf(@settings.controls) >= 0
+
       @populate_whole_form() if e.shiftKey and char is '!'
 
       if @settings.controls isnt 'minimum'
@@ -97,9 +79,6 @@ class Marx
           @open_advanced_controls()
           $('standard-controls').hide()
 
-  set_toggle_advanced: ->
-    this.$('advanced-controls').hide()
-    # this.$('a.marx-toggle-advanced').click (e) => @toggle_advanced $(e.target)
 
   ###=========================
       POPULATE FORM METHODS
@@ -382,7 +361,6 @@ class Marx
       @toggle_key_bindings $('standard-controls').is(":visible")
       @open_advanced_controls(false) if @settings.controls is 'toggle-advanced'
     false
-
 
   open_advanced_controls: (open=null) ->
     if open is true
