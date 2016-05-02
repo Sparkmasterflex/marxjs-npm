@@ -4,7 +4,6 @@ debug      = require('gulp-debug')
 stylus     = require('gulp-stylus')
 riot       = require('gulp-riot')
 coffee     = require('gulp-coffee')
-rename     = require('gulp-rename')
 connect    = require('gulp-connect')
 source     = require('vinyl-source-stream')
 browserify = require('browserify')
@@ -59,6 +58,7 @@ gulp.task 'connect', ->
 gulp.task 'build', ->
   return gulp.src('./build/bundle.js')
     .pipe(uglify())
+    .pipe(rename('marx.js'))
     .pipe(gulp.dest('./'));
 
 
