@@ -1,5 +1,6 @@
 gulp       = require('gulp')
 gutil      = require('gulp-util')
+debug      = require('gulp-debug')
 stylus     = require('gulp-stylus')
 riot       = require('gulp-riot')
 coffee     = require('gulp-coffee')
@@ -33,7 +34,7 @@ gulp.task 'coffee', ->
 
 
 gulp.task 'browserify', ['coffee', 'riot'],  ->
-  browserify('./build/javascripts/app.js')
+  browserify('./build/javascripts/marx.js')
   .bundle()
   .pipe(source('bundle.js'))
   .pipe(gulp.dest('./'))
@@ -56,8 +57,7 @@ gulp.task 'connect', ->
     livereload: true
 
 gulp.task 'build', ->
-  return gulp.src('./build/**/*.js')
-    .pipe(concat('marx.js'))
+  return gulp.src('./build/bundle.js')
     .pipe(uglify())
     .pipe(gulp.dest('./'));
 
