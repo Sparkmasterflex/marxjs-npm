@@ -1,23 +1,20 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var $, Marx;
-
-Marx = require('./marx');
-
-$ = require('jquery');
-
-$(function() {
-  console.log('come on');
-  return new Marx();
-});
-
-},{"./marx":2,"jquery":4}],2:[function(require,module,exports){
-var $, Marx, controls, riot;
+var $, Marx, advanced, controls, ipsum, notifications, riot, simple,
+  bind1 = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 $ = require('jquery');
 
 riot = require('riot');
 
 controls = require('../views/marx-js-controls.js');
+
+ipsum = require('../views/marx-js-ipsum.js');
+
+notifications = require('../views/marx-js-notifications.js');
+
+simple = require('../views/simple-open-controls.js');
+
+advanced = require('../views/advanced-open-controls.js');
 
 Marx = (function() {
   Marx.prototype.settings = {
@@ -30,6 +27,9 @@ Marx = (function() {
   };
 
   function Marx(options) {
+    this.open_controls = bind1(this.open_controls, this);
+    this.toggle_advanced = bind1(this.toggle_advanced, this);
+    this.populate_whole_form = bind1(this.populate_whole_form, this);
     this._url = "http://marxjs.com";
     $.getJSON(this._url + "/characters", (function(_this) {
       return function(data) {
@@ -43,16 +43,320 @@ Marx = (function() {
     $.extend(this.settings, options);
     this.methods = this.method_by_keys();
     this.effected = this.default_counts();
+    if (this.settings.onload) {
+      this.auto_populate();
+    }
     return this.create_controls();
   };
 
   Marx.prototype.create_controls = function() {
-    console.log('goodbye cruel world');
-    $('body').append("<marx-js-controls></marx-js-controls>");
-    return riot.mount('marx-js-controls', {
-      url: this._url,
-      something: 'different'
+    var open_template, tags;
+    $('body').append("<marx-js-notifications></marx-js-notifications>\n<marx-js-controls></marx-js-controls>");
+    riot.mount('marx-js-controls', {
+      settings: this.settings,
+      advanced: ['standard', 'minimum'].indexOf(this.settings.controls) === -1,
+      toggle_advanced: this.settings.controls === 'toggle-advanced'
     });
+    tags = riot.mount('marx-js-notifications', {
+      position: this.settings.position
+    });
+    this.notifications = tags[0];
+    this.$el = $('marx-js-controls');
+    open_template = this.settings.controls === 'toggle-all' ? 'advanced-open-controls' : 'simple-open-controls';
+    riot.mount('marx-js-open', open_template, {
+      controls: this.settings.controls
+    });
+    this.$('standard-controls control a').click((function(_this) {
+      return function(e) {
+        return _this.popluate_selected_fields(e);
+      };
+    })(this));
+    return this.setup_control_listeners();
+  };
+
+  Marx.prototype.setup_control_listeners = function() {
+    if (this.settings.controls === 'toggle-advanced') {
+      this.$('advanced-controls').hide();
+    }
+    this.$('advanced-controls control a').click((function(_this) {
+      return function(e) {
+        return _this.advanced_actions(e);
+      };
+    })(this));
+    return document.addEventListener('keypress', (function(_this) {
+      return function(e) {
+        var char;
+        char = String.fromCharCode(e.keyCode);
+        if (e.shiftKey && char === '!') {
+          _this.populate_whole_form();
+        }
+        if (_this.settings.controls !== 'minimum') {
+          if (e.shiftKey && char === "@") {
+            _this.open_controls();
+          }
+          if (_this.settings.controls === 'toggle-all' && $('advanced-controls').is(':visible')) {
+            $('advanced-controls').hide();
+          } else if (_this.settings.controls === 'advanced') {
+            _this.open_advanced_controls();
+          }
+        }
+        if (e.shiftKey && char === "#") {
+          if (_this.settings.controls === 'toggle-advanced' && $('standard-controls').is(":visible")) {
+            return _this.open_advanced_controls();
+          } else if (_this.settings.controls === 'toggle-all') {
+            _this.open_advanced_controls();
+            return $('standard-controls').hide();
+          }
+        }
+      };
+    })(this));
+  };
+
+
+  /*=========================
+      POPULATE FORM METHODS
+  =========================
+   */
+
+  Marx.prototype.auto_populate = function() {
+    var onload;
+    onload = this.settings.onload;
+    if (onload === true) {
+      return this.populate_whole_form();
+    } else {
+      return $.each(onload, (function(_this) {
+        return function(i, opt) {
+          return _this.methods[opt]();
+        };
+      })(this));
+    }
+  };
+
+  Marx.prototype.populate_whole_form = function(e) {
+    this.populate_inputs();
+    this.populate_textareas();
+    this.populate_checkboxes();
+    this.populate_radios();
+    this.populate_selects();
+    return false;
+  };
+
+  Marx.prototype.populate_inputs = function() {
+    var marx, ref;
+    marx = this.marx || this;
+    if ((ref = marx.effected) != null) {
+      ref.inputs = 0;
+    }
+    return $.each($(marx.settings.form + " input"), (function(_this) {
+      return function(i, input) {
+        var brother, movie, obj, rand, str, strings, value, year;
+        if (!($(input).val() !== "" || $(input).hasClass('no-populate'))) {
+          obj = marx.get_random();
+          brother = JSON.parse(obj.brother);
+          movie = JSON.parse(obj.movie);
+          rand = Math.random();
+          year = movie.year.toString();
+          strings = [brother.name, movie.name, obj.first_name, obj.last_name, obj.description].filter(function() {
+            return true;
+          });
+          value = (function() {
+            switch ($(input).attr('type')) {
+              case 'number':
+                return movie.year;
+              case 'email':
+                return (brother.name.toLowerCase().replace(/\s/g, '')) + "@" + (movie.name.toLowerCase().replace(/\s/g, '')) + ".com";
+              case 'url':
+                return "http://" + (movie.name.toLowerCase().replace(/\s/g, '')) + ".com";
+              case 'tel':
+                return Math.floor(Math.random() * 10000000000).toString();
+              case 'date':
+                return year + "-0" + (year.substr(Math.floor(rand * 4), 1)) + "-2" + (year.substr(Math.floor(rand * 4), 1));
+              default:
+                str = strings[Math.floor(Math.random() * strings.length)];
+                if ((str == null) || str === "") {
+                  return "Marx";
+                } else {
+                  return str;
+                }
+            }
+          })();
+          if ($(input).attr('type') === 'password') {
+            marx.show_password($(input), value);
+          }
+          if (['checkbox', 'radio', 'hidden'].indexOf($(input).attr('type') < 0)) {
+            $(input).attr('data-marx-d', true).val(value).trigger('change').trigger('blur');
+            return marx.effected.inputs += 1;
+          }
+        }
+      };
+    })(this));
+  };
+
+  Marx.prototype.show_password = function($input, password) {
+    return $input.after("<p class='marx-password-note'>Password: " + password + "</p>");
+  };
+
+  Marx.prototype.populate_textareas = function() {
+    var marx;
+    marx = this.marx || this;
+    marx.effected.textareas = 0;
+    return $.getJSON(marx._url + "/quotes", (function(_this) {
+      return function(data) {
+        return $.each($(marx.settings.form + " textarea"), function(i, input) {
+          marx.effected.textareas += 1;
+          return $(input).attr('data-marx-d', true).val(data[Math.floor(Math.random() * data.length)].body).trigger('change').trigger('blur');
+        });
+      };
+    })(this));
+  };
+
+  Marx.prototype.populate_checkboxes = function() {
+    var marx, names;
+    marx = this.marx || this;
+    marx.effected.check_boxes = 0;
+    names = [];
+    $.each($(marx.settings.form + " input[type=checkbox]"), function(i, input) {
+      if (!(names.indexOf($(input).attr('name')) >= 0)) {
+        return names.push($(input).attr('name'));
+      }
+    });
+    return $.each(names, (function(_this) {
+      return function(i, name) {
+        var checked, clean_name;
+        checked = Math.floor(Math.random() * 2) === 1 ? true : false;
+        clean_name = name.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
+        $(marx.settings.form + " input[name=" + clean_name + "]").attr('data-marx-d', true).attr('checked', checked).trigger('change').trigger('blur');
+        if (checked) {
+          return marx.effected.check_boxes += 1;
+        }
+      };
+    })(this));
+  };
+
+  Marx.prototype.populate_radios = function() {
+    var marx, names;
+    marx = this.marx || this;
+    marx.effected.radio_buttons = 0;
+    names = [];
+    $(marx.settings.form + " input[type=radio]").each(function(i, input) {
+      if (!(names.indexOf($(input).attr('name')) >= 0)) {
+        return names.push($(input).attr('name'));
+      }
+    });
+    return $.each(names, (function(_this) {
+      return function(i, name) {
+        var clean_name, total;
+        clean_name = name.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
+        total = $(marx.settings.form + " input[name=" + clean_name + "]").length;
+        $(marx.settings.form + " input[name=" + name + "]:eq(" + (Math.floor(Math.random() * total)) + ")").attr('data-marx-d', true).attr('checked', true).trigger('change').trigger('blur');
+        return marx.effected.radio_buttons += 1;
+      };
+    })(this));
+  };
+
+  Marx.prototype.populate_selects = function() {
+    var marx;
+    marx = this.marx || this;
+    marx.effected.selects = 0;
+    return $(marx.settings.form + " select").each((function(_this) {
+      return function(i, select) {
+        var $opt, rand, total;
+        marx.effected.selects += 1;
+        total = $(select).attr('data-marx-d', true).find('option').length;
+        rand = Math.floor(Math.random() * total);
+        $opt = $(select).find("option:eq(" + rand + ")");
+        if (($opt.attr('value') != null) && $opt.attr('value') !== "") {
+          $opt.attr('selected', true);
+        } else {
+          $opt.next('option').attr('selected', true);
+        }
+        return $(select).trigger('change').trigger('blur');
+      };
+    })(this));
+  };
+
+  Marx.prototype.toggle_hidden_fields = function() {
+    this.effected.hidden_fields = 0;
+    $(this.settings.form + " input[data-marx-hidden=true]").each((function(_this) {
+      return function(i, input) {
+        var type;
+        type = $(input).attr('type') === 'hidden' ? 'text' : 'hidden';
+        $(input).attr('type', type);
+        return _this.effected.hidden_fields += 1;
+      };
+    })(this));
+    return $(this.settings.form + " input[type=hidden]").each((function(_this) {
+      return function(i, hidden) {
+        if ($(hidden).data('marx-d') == null) {
+          _this.effected.hidden_fields += 1;
+          return $(hidden).attr('type', 'text').attr('data-marx-d', true).attr('data-marx-hidden', true);
+        }
+      };
+    })(this));
+  };
+
+  Marx.prototype.trigger_notifications = function() {
+    this.notifications.alerts = [];
+    $.each(this.effected, (function(_this) {
+      return function(key, val) {
+        var el;
+        if (val !== 0) {
+          el = key.replace(/_/, ' ');
+          _this.notifications.alerts.push({
+            count: val,
+            element: el
+          });
+        }
+        return _this.effected[key] = 0;
+      };
+    })(this));
+    this.notifications.update();
+    return this.position_notifications();
+  };
+
+  Marx.prototype.position_notifications = function() {
+    var notification_bottom;
+    notification_bottom = ($('marx-js-controls').height() + 40) - $('marx-js-notifications').height();
+    $('marx-js-notifications').hide().slideDown('fast');
+    $('marx-js-notifications').css({
+      bottom: notification_bottom,
+      right: $('marx-js-controls').width()
+    });
+    return setTimeout((function(_this) {
+      return function() {
+        return $('notification').slideUp('fast', function() {
+          _this.notifications.alerts = null;
+          return _this.notifications.update();
+        });
+      };
+    })(this), 5000);
+  };
+
+  Marx.prototype.toggle_description = function($link) {
+    var $parent, $span, from, to;
+    $parent = $link.parent('.marx-js-group');
+    $span = $parent.find('p span');
+    to = $span.data('text');
+    from = $span.text();
+    return $span.text(to).data('text', from);
+  };
+
+  Marx.prototype.generate_ipsum = function() {
+    var marx;
+    marx = this.marx || this;
+    $('body').append("<marx-js-ipsum></marx-js-ipsum>");
+    return riot.mount('marx-js-ipsum', {
+      url: marx._url,
+      position: this.settings.position
+    });
+  };
+
+  Marx.prototype.get_random = function() {
+    return this.marx_json[Math.floor(Math.random() * this.marx_json.length)];
+  };
+
+  Marx.prototype.$ = function(el) {
+    return this.$el.find(el);
   };
 
   Marx.prototype.method_by_keys = function() {
@@ -77,16 +381,333 @@ Marx = (function() {
     };
   };
 
+
+  /*=====================
+           EVENTS
+  =====================
+   */
+
+  Marx.prototype.popluate_selected_fields = function(e) {
+    var fn;
+    fn = (function() {
+      switch ($(e.target).attr('class')) {
+        case 'populate-textareas':
+          return this.populate_textareas;
+        case 'populate-inputs':
+          return this.populate_inputs;
+        case 'populate-checkboxes':
+          return this.populate_checkboxes;
+        case 'populate-radios':
+          return this.populate_radios;
+        case 'populate-selects':
+          return this.populate_selects;
+        default:
+          return this.populate_whole_form;
+      }
+    }).call(this);
+    $.when(fn()).then((function(_this) {
+      return function() {
+        return _this.trigger_notifications();
+      };
+    })(this));
+    return false;
+  };
+
+  Marx.prototype.advanced_actions = function(e) {
+    switch ($(e.target).attr('class')) {
+      case 'clear-form':
+        $('input[data-marx-d=true], textarea[data-marx-d=true]').val("");
+        $('input[type=checkbox], input[type=radio]').each(function(i, cb) {
+          if (($(cb).data('marx-d') != null) === $(cb).data('marx-d') && true) {
+            return $(cb).removeAttr('checked');
+          }
+        });
+        $('select[data-marx-d=true] option:eq(0)').attr('selected', true);
+        break;
+      case 'populate-submit':
+        $.when(this.populate_whole_form()).then(function() {
+          $(e.target).replaceWith("<span class='spinner'>Loading</span>");
+          return setTimeout(function() {
+            return $('form').submit();
+          }, 500);
+        });
+        break;
+      case 'show-hidden':
+        this.toggle_description($(e.target));
+        $.when(this.toggle_hidden_fields()).then((function(_this) {
+          return function() {
+            return _this.trigger_notifications();
+          };
+        })(this));
+        break;
+      case 'expand-select':
+        this.toggle_description($(e.target));
+        $('select').each((function(_this) {
+          return function(i, select) {
+            if ($(select).attr('size') != null) {
+              return $(select).removeAttr('size');
+            } else {
+              return $(select).attr('size', $(select).find('option').length);
+            }
+          };
+        })(this));
+        break;
+      case 'random-image':
+        window.location = this._url + "/get-image";
+        break;
+      case 'generate-ipsum':
+        this.generate_ipsum();
+    }
+    return false;
+  };
+
+  Marx.prototype.toggle_advanced = function(e) {
+    var $link, txt;
+    $link = $(e.target);
+    txt = $link.hasClass('opened') ? "&laquo; Advanced" : "Close &raquo;";
+    $link.toggleClass('opened').html(txt);
+    this.$('advanced-controls').toggle();
+    return false;
+  };
+
+  Marx.prototype.toggle_key_bindings = function(bind) {
+    if (bind) {
+      return document.addEventListener("keypress", this.trigger_action);
+    } else {
+      return document.removeEventListener('keypress', this.trigger_action);
+    }
+  };
+
+  Marx.prototype.trigger_action = function(e) {
+    var char, trigger;
+    char = String.fromCharCode(e.keyCode);
+    trigger = (function() {
+      switch (char) {
+        case '1':
+          return "populate-whole-form";
+        case '2':
+          return "populate-textareas";
+        case '3':
+          return "populate-inputs";
+        case '4':
+          return "populate-checkboxes";
+        case '5':
+          return "populate-radios";
+        case '6':
+          return "populate-selects";
+        case '7':
+          return "clear-form";
+        case '8':
+          return "populate-submit";
+        case '9':
+          return "show-hidden";
+        case '0':
+          return "expand-select";
+        case '$':
+          return "random-image";
+        case '%':
+          return "generate-ipsum";
+      }
+    })();
+    if (trigger != null) {
+      return document.querySelector("a." + trigger).click();
+    }
+  };
+
+  Marx.prototype.open_controls = function(e) {
+    $('standard-controls').slideToggle('fast', (function(_this) {
+      return function() {
+        _this.toggle_key_bindings($('standard-controls').is(":visible"));
+        if (_this.settings.controls === 'toggle-advanced') {
+          return _this.open_advanced_controls(false);
+        }
+      };
+    })(this));
+    return false;
+  };
+
+  Marx.prototype.open_advanced_controls = function(open) {
+    if (open == null) {
+      open = null;
+    }
+    if (open === true) {
+      $('advanced-controls').slideDown('fast');
+    } else if (open === false) {
+      $('advanced-controls').slideUp('fast');
+    } else {
+      $('advanced-controls').slideToggle('fast');
+    }
+    return false;
+  };
+
   return Marx;
 
 })();
 
 module.exports = Marx;
 
-},{"../views/marx-js-controls.js":3,"jquery":4,"riot":5}],3:[function(require,module,exports){
-riot.tag2('marx-js-controls', '<link rel="stylesheet" href="{opts.url}/marx.css">', '', '', function(opts) {
+},{"../views/advanced-open-controls.js":2,"../views/marx-js-controls.js":3,"../views/marx-js-ipsum.js":4,"../views/marx-js-notifications.js":5,"../views/simple-open-controls.js":6,"jquery":7,"riot":8}],2:[function(require,module,exports){
+(function(tagger) {
+  if (typeof define === 'function' && define.amd) {
+    define(['riot'], function(riot) { tagger(riot); });
+  } else if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    tagger(require('riot'));
+  } else {
+    tagger(window.riot);
+  }
+})(function(riot) {
+$ = require('jquery')
+riot = require('riot')
+riot.tag2('advanced-open-controls', '<div class="open-controls-group"> <a onclick="{marx.populate_whole_form}" href="#populate-whole-form" class="quick-populate" title="Populate Whole Form">Marx.js</a> <a onclick="{marx.open_controls}" href="#standard-controls" class="standard-controls" title="Show Standard Controls">Standard Controls</a> <a onclick="{marx.open_advanced_controls}" href="#advanced-controls" class="advanced-controls" title="Show Advanced Controls">Advanced Controls</a> </div>', '', '', function(opts) {
 });
-},{}],4:[function(require,module,exports){
+
+});
+},{"jquery":7,"riot":8}],3:[function(require,module,exports){
+(function(tagger) {
+  if (typeof define === 'function' && define.amd) {
+    define(['riot'], function(riot) { tagger(riot); });
+  } else if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    tagger(require('riot'));
+  } else {
+    tagger(window.riot);
+  }
+})(function(riot) {
+riot = require('riot')
+riot.tag2('marx-js-controls', '<link rel="stylesheet" href="build/stylesheets/base.css"> <marx-js-open></marx-js-open> <standard-controls> <control each="{standard}"> <a href="#{this.action}" class="{this.action}">Go</a> <p>{this.label}</p> </control> <toggle-advanced if="{opts.toggle_advanced}"></toggle-advanced> </standard-controls> <advanced-controls if="{opts.advanced}"> <control each="{advanced}" settings="{opts.settings}"> <a href="#{this.action}" class="{this.action}">Go</a> <p> {this.label} <ipsum if="{this.html}" settings="{opts.settings}"></ipsum> </p> </control> </advanced-controls>', '', 'class="marx-{opts.settings.position}"', function(opts) {
+this.standard = [
+  {
+    action: 'populate-whole-form',
+    label: 'Populate Whole Form',
+    key: 1
+  }, {
+    action: 'populate-textareas',
+    label: 'Populate TextAreas',
+    key: 2
+  }, {
+    action: 'populate-inputs',
+    label: 'Populate Inputs',
+    key: 3
+  }, {
+    action: 'populate-checkboxes',
+    label: 'Populate Check Boxes',
+    key: 4
+  }, {
+    action: 'populate-radios',
+    label: 'Populate Radio Buttons',
+    key: 5
+  }, {
+    action: 'populate-selects',
+    label: 'Populate Select Boxes',
+    key: 6
+  }
+];
+
+this.advanced = [
+  {
+    action: 'clear-form',
+    label: 'Clear Form',
+    key: 7
+  }, {
+    action: 'populate-submit',
+    label: 'Populate and Submit',
+    key: 8
+  }, {
+    action: 'show-hidden',
+    label: 'Show Hidden Fields',
+    key: 9
+  }, {
+    action: 'expand-select',
+    label: 'Expand Select Boxes',
+    key: 0
+  }, {
+    action: 'random-image',
+    label: 'Download Random Image',
+    key: '$'
+  }, {
+    action: 'generate-ipsum',
+    label: "Generate Ipsum",
+    key: '%',
+    html: 'ipsum'
+  }
+];
+});
+
+
+riot.tag2('ipsum', '<input value="{opts.settings.ipsum}" max="{opts.settings.max_ipsum}" type="{\'number\'}"> <span>Paragraphs</span>', '', '', function(opts) {
+});
+
+riot.tag2('toggle-advanced', '<a onclick="{marx.toggle_advanced}" href="#advanced" class="marx-toggle-advanced">&laquo; Advanced</a>', '', '', function(opts) {
+});
+
+});
+},{"riot":8}],4:[function(require,module,exports){
+(function(tagger) {
+  if (typeof define === 'function' && define.amd) {
+    define(['riot'], function(riot) { tagger(riot); });
+  } else if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    tagger(require('riot'));
+  } else {
+    tagger(window.riot);
+  }
+})(function(riot) {
+riot = require('riot')
+$ = require('jquery')
+
+riot.tag2('marx-js-ipsum', '<h4>Marx Ipsum</h4> <a onclick="{this.close_ipsum}" href="#close" class="marx-ipsum-close">X</a> <div class="marx-container"> <spinner if="{!this.ipsums}"></spinner> <ipsum-para if="{this.ipsums}" each="{this.ipsums}"> {this.body} </ipsum-para> </div>', '', 'class="marx-{opts.position}"', function(opts) {
+var num;
+
+num = marx.$('ipsum input').val();
+
+$.getJSON(opts.url + "/monologues", (function(_this) {
+  return function(data) {
+    var max;
+    max = num > data.length ? data.length - 1 : num;
+    _this.ipsums = data.sort(function() {
+      return 0.5 - Math.random();
+    });
+    return _this.update();
+  };
+})(this));
+
+this.close_ipsum = function(e) {
+  $('marx-js-ipsum').slideUp('fast');
+  return false;
+};
+});
+
+});
+},{"jquery":7,"riot":8}],5:[function(require,module,exports){
+(function(tagger) {
+  if (typeof define === 'function' && define.amd) {
+    define(['riot'], function(riot) { tagger(riot); });
+  } else if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    tagger(require('riot'));
+  } else {
+    tagger(window.riot);
+  }
+})(function(riot) {
+riot = require('riot')
+
+riot.tag2('marx-js-notifications', '<notification if="{this.alerts}" each="{this.alerts}"> {this.count} {this.element} elements were altered </notification>', '', 'class="marx-{opts.position}"', function(opts) {
+});
+
+});
+},{"riot":8}],6:[function(require,module,exports){
+(function(tagger) {
+  if (typeof define === 'function' && define.amd) {
+    define(['riot'], function(riot) { tagger(riot); });
+  } else if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    tagger(require('riot'));
+  } else {
+    tagger(window.riot);
+  }
+})(function(riot) {
+riot = require('riot')
+riot.tag2('simple-open-controls', '<a onclick="{this.activate_controls}" href="#open-controls" class="open-controls">Marx.js</a>', '', '', function(opts) {
+});
+
+});
+},{"riot":8}],7:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.2.3
  * http://jquery.com/
@@ -9930,7 +10551,7 @@ if ( !noGlobal ) {
 return jQuery;
 }));
 
-},{}],5:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /* Riot v2.3.18, @license MIT */
 
 ;(function(window, undefined) {

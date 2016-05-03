@@ -36,7 +36,7 @@ gulp.task 'browserify', ['coffee', 'riot'],  ->
   browserify('./build/javascripts/marx.js')
   .bundle()
   .pipe(source('bundle.js'))
-  .pipe(gulp.dest('./'))
+  .pipe(gulp.dest('./build'))
   .pipe(connect.reload())
 
 
@@ -55,7 +55,7 @@ gulp.task 'connect', ->
     root: '.',
     livereload: true
 
-gulp.task 'build', ->
+gulp.task 'build', ['coffee', 'riot', 'browserify'], ->
   return gulp.src('./build/bundle.js')
     .pipe(uglify())
     .pipe(rename('marx.js'))
@@ -63,3 +63,5 @@ gulp.task 'build', ->
 
 
 gulp.task 'default', ['stylus', 'coffee', 'riot', 'browserify', 'connect', 'watch']
+
+gulp.task 'build-production', ['stylus', 'coffee', 'riot', 'browserify', 'build']

@@ -75,7 +75,7 @@ Marx = (function() {
 
   Marx.prototype.setup_control_listeners = function() {
     if (this.settings.controls === 'toggle-advanced') {
-      this.set_toggle_advanced();
+      this.$('advanced-controls').hide();
     }
     this.$('advanced-controls control a').click((function(_this) {
       return function(e) {
@@ -109,10 +109,6 @@ Marx = (function() {
         }
       };
     })(this));
-  };
-
-  Marx.prototype.set_toggle_advanced = function() {
-    return this.$('advanced-controls').hide();
   };
 
 

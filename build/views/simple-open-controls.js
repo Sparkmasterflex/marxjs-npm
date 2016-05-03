@@ -9,14 +9,6 @@
 })(function(riot) {
 riot = require('riot')
 riot.tag2('simple-open-controls', '<a onclick="{this.activate_controls}" href="#open-controls" class="open-controls">Marx.js</a>', '', '', function(opts) {
-this.activate_controls = function(e) {
-  if (opts.controls === "minimum") {
-    marx.populate_whole_form();
-  } else {
-    marx.open_controls();
-  }
-  return false;
-};
 });
 
 });
