@@ -372,4 +372,4 @@ class Marx
     false
 
 
-module.exports = (options) -> new Marx(options)
+module.exports = Marx.Marx(options)

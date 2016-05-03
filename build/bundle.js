@@ -544,9 +544,7 @@ Marx = (function() {
 
 })();
 
-module.exports = function(options) {
-  return new Marx(options);
-};
+module.exports = Marx.Marx(options);
 
 },{"../views/advanced-open-controls.js":2,"../views/marx-js-controls.js":3,"../views/marx-js-ipsum.js":4,"../views/marx-js-notifications.js":5,"../views/simple-open-controls.js":6,"jquery":7,"riot":8}],2:[function(require,module,exports){
 (function(tagger) {
