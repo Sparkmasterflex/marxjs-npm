@@ -371,5 +371,4 @@ class Marx
       $('advanced-controls').slideToggle 'fast'
     false
 
-
-module.exports = Marx.Marx(options)
+module.exports = Marx

@@ -543,4 +543,4 @@ Marx = (function() {
 
 })();
 
-module.exports = Marx.Marx(options);
+module.exports = Marx;
