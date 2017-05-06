@@ -1,10 +1,12 @@
 $             = require('jquery')
 riot          = require('riot')
-controls      = require('../views/marx-js-controls.js')
-ipsum         = require('../views/marx-js-ipsum.js')
-notifications = require('../views/marx-js-notifications.js')
-simple        = require('../views/simple-open-controls.js')
-advanced      = require('../views/advanced-open-controls.js')
+controls      = require('../views/marx-js-controls')
+ipsum         = require('../views/marx-js-ipsum')
+notifications = require('../views/marx-js-notifications')
+simple        = require('../views/simple-open-controls')
+advanced      = require('../views/advanced-open-controls')
+
+styles = require('../stylesheets/base')
 
 class Marx
   settings:
