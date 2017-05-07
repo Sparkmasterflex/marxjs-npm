@@ -8,10 +8,7 @@
     "build": "webpack -p --config ./webpack.production.config.js --progress --profile --colors",
     "watch": "webpack --watch -p --config ./webpack.production.config.js --progress --profile --colors"
   },
-  "files": [
-    "marx.js",
-    "build/base.css"
-  ],
+  "files": [ "index.js" ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Sparkmasterflex/marx-js.git"
