@@ -297,7 +297,12 @@ class Marx
     else
       @$('advanced-controls').slideToggle 'fast', on_complete
 
-
+  advanced_link_text: ->
+    $link = $('a.marx-toggle-advanced')
+    txt = if $link.hasClass('opened') then "&laquo; Advanced" else "Close &raquo;"
+    $link
+      .toggleClass('opened')
+      .html(txt)
 
   ###=====================
            EVENTS
@@ -350,13 +355,10 @@ class Marx
 
     false
 
+
   toggle_advanced: (e) =>
     e.preventDefault()
-    $link = $(e.target)
-    txt = if $link.hasClass('opened') then "&laquo; Advanced" else "Close &raquo;"
-    $link
-      .toggleClass('opened')
-      .html(txt)
+    this.advanced_link_text()
     this.toggle_advanced_controls()
     false
 
@@ -391,7 +393,9 @@ class Marx
     switch @settings.controls
       when 'standard', 'toggle-advanced'
         @toggle_standard_controls()
-        @toggle_advanced_controls(false) if $('advanced-controls').is(":visible")
+        if $('advanced-controls').is(":visible")
+          @advanced_link_text()
+          @toggle_advanced_controls(false)
       when 'advanced'
         @toggle_standard_controls()
         @toggle_advanced_controls()
