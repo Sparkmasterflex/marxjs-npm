@@ -1,4 +1,5 @@
 
+index.js
 node_modules/
 marxjs-npm.sublime-*
 build/*.js
