@@ -30,7 +30,7 @@ module.exports = {
         }
       },
       { test: /\.coffee$/, loader: 'coffee-loader' },
-      { test: /\.styl$/, loader: 'css-loader!stylus-loader?paths=node_modules/bootstrap-stylus/stylus/' },
+      { test: /\.styl$/, loader: 'style-loader!css-loader!stylus-loader' },
       { test: /\.json$/, loader: 'json-loader' }
     ]
   },

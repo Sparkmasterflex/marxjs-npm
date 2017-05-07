@@ -33,6 +33,7 @@
     "css-loader": "^0.28.1",
     "riot": "^3.0.7",
     "riot-tag-loader": "^1.0.0",
+    "style-loader": "^0.17.0",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.1",
     "webpack": "^2.4.1"
