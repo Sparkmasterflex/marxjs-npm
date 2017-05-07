@@ -11,8 +11,8 @@ $ = require('jquery')
     </ipsum-para>
   </div>
 
-  <script>
-    num = marx.$('ipsum input').val()
+  <script type='coffee'>
+    num = $('advanced-controls ipsum input').val()
     $.getJSON "#{opts.url}/monologues", (data) =>
       max = if num > data.length then data.length-1 else num
       this.ipsums = data.sort () -> 0.5 - Math.random()

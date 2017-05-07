@@ -36,10 +36,16 @@ class Marx
       <marx-js-notifications></marx-js-notifications>
       <marx-js-controls></marx-js-controls>
     """
-    riot.mount 'marx-js-controls',
+    control_opts =
       settings: this.settings,
       advanced: (['standard', 'minimum'].indexOf(this.settings.controls) is -1)
-      toggle_advanced: this.settings.controls is 'toggle-advanced'
+    if this.settings.controls is 'toggle-advanced'
+      $.extend control_opts, {
+        toggle_advanced: true
+        func: this.toggle_advanced_controls
+      }
+
+    riot.mount 'marx-js-controls', control_opts
 
     tags = riot.mount 'marx-js-notifications', { position: this.settings.position }
     this.notifications = tags[0]
@@ -50,7 +56,13 @@ class Marx
     then 'advanced-open-controls'
     else 'simple-open-controls'
 
-    riot.mount 'marx-js-open', open_template, {controls: this.settings.controls}
+    if this.settings.controls is 'minimum'
+      opts = {action: this.populate_whole_form}
+    else
+      opts = {action: this.handle_open_close_controls, controls: this.settings.controls}
+      $.extend opts, {populate: this.populate_whole_form} if this.settings.controls is 'toggle-all'
+
+    riot.mount 'marx-js-open', open_template, opts
 
     this.$('standard-controls control a').click (e) => @popluate_selected_fields(e)
 
@@ -94,6 +106,7 @@ class Marx
         @methods[opt]()
 
   populate_whole_form: (e) =>
+    e.preventDefault()
     @populate_inputs()
     @populate_textareas()
     @populate_checkboxes()
@@ -101,12 +114,11 @@ class Marx
     @populate_selects()
     false
 
-  populate_inputs: ->
-    marx = this.marx or this
-    marx.effected?.inputs = 0
-    $.each $("#{marx.settings.form} input"), (i, input) =>
+  populate_inputs: =>
+    @effected?.inputs = 0
+    $.each $("#{@settings.form} input"), (i, input) =>
       unless $(input).val() isnt "" or $(input).hasClass 'no-populate'
-        obj     = marx.get_random()
+        obj     = @get_random()
         brother = JSON.parse(obj.brother)
         movie   = JSON.parse(obj.movie)
         rand    = Math.random()
@@ -123,7 +135,7 @@ class Marx
           else
             str = strings[Math.floor(Math.random() * strings.length)]
             if !str? or str is "" then "Marx" else str
-        marx.show_password($(input), value) if $(input).attr('type') is 'password'
+        @show_password($(input), value) if $(input).attr('type') is 'password'
 
         if ['checkbox', 'radio', 'hidden'].indexOf $(input).attr('type') < 0
           $(input)
@@ -131,56 +143,52 @@ class Marx
             .val(value)
             .trigger('change')
             .trigger 'blur'
-          marx.effected.inputs += 1
+          @effected.inputs += 1
 
   show_password: ($input, password) ->
     $input.after "<p class='marx-password-note'>Password: #{password}</p>"
 
-  populate_textareas: ->
-    marx = this.marx or this
-    marx.effected.textareas = 0
-    $.getJSON "#{marx._url}/quotes", (data) =>
-      $.each $("#{marx.settings.form} textarea"), (i, input) =>
-        marx.effected.textareas += 1
+  populate_textareas: =>
+    @effected.textareas = 0
+    $.getJSON "#{@_url}/quotes", (data) =>
+      $.each $("#{@settings.form} textarea"), (i, input) =>
+        @effected.textareas += 1
         $(input)
           .attr('data-marx-d', true)
           .val(data[Math.floor(Math.random() * data.length)].body)
           .trigger('change').trigger('blur')
 
-  populate_checkboxes: ->
-    marx = this.marx or this
-    marx.effected.check_boxes = 0
+  populate_checkboxes: =>
+    @effected.check_boxes = 0
     names = []
-    $.each $("#{marx.settings.form} input[type=checkbox]"), (i, input) ->
+    $.each $("#{@settings.form} input[type=checkbox]"), (i, input) ->
       names.push $(input).attr('name') unless names.indexOf($(input).attr('name')) >= 0
     $.each names, (i, name) =>
       checked = if Math.floor(Math.random() * 2) is 1 then true else false
       clean_name = name.replace(/\[/g, '\\[').replace(/\]/g, '\\]')
-      $("#{marx.settings.form} input[name=#{clean_name}]")
+      $("#{@settings.form} input[name=#{clean_name}]")
         .attr('data-marx-d', true)
         .attr('checked', checked)
         .trigger('change').trigger('blur')
-      marx.effected.check_boxes += 1 if checked
+      @effected.check_boxes += 1 if checked
 
-  populate_radios: ->
-    marx = this.marx or this
-    marx.effected.radio_buttons = 0
+  populate_radios: =>
+    @effected.radio_buttons = 0
     names = []
-    $("#{marx.settings.form} input[type=radio]").each (i, input) -> names.push $(input).attr('name') unless names.indexOf($(input).attr('name')) >= 0
+    $("#{this.settings.form} input[type=radio]").each (i, input) -> names.push $(input).attr('name') unless names.indexOf($(input).attr('name')) >= 0
     $.each names, (i, name) =>
       clean_name = name.replace(/\[/g, '\\[').replace(/\]/g, '\\]')
-      total = $("#{marx.settings.form} input[name=#{clean_name}]").length
-      $("#{marx.settings.form} input[name=#{name}]:eq(#{Math.floor(Math.random() * total)})")
+      total = $("#{@settings.form} input[name=#{clean_name}]").length
+      $("#{@settings.form} input[name=#{name}]:eq(#{Math.floor(Math.random() * total)})")
         .attr('data-marx-d', true)
         .attr('checked', true)
         .trigger('change').trigger('blur')
-      marx.effected.radio_buttons += 1
+      @effected.radio_buttons += 1
 
-  populate_selects: ->
-    marx = this.marx or this
-    marx.effected.selects = 0
-    $("#{marx.settings.form} select").each (i, select) =>
-      marx.effected.selects += 1
+  populate_selects: =>
+    @effected.selects = 0
+    $("#{@settings.form} select").each (i, select) =>
+      @effected.selects += 1
       total = $(select).attr('data-marx-d', true).find('option').length
       rand = Math.floor(Math.random() * total)
       $opt = $(select).find("option:eq(#{rand})")
@@ -190,14 +198,14 @@ class Marx
         $opt.next('option').attr('selected', true)
       $(select).trigger('change').trigger('blur')
 
-  toggle_hidden_fields: ->
-    this.effected.hidden_fields = 0
-    $("#{this.settings.form} input[data-marx-hidden=true]").each (i, input) =>
+  toggle_hidden_fields: =>
+    @effected.hidden_fields = 0
+    $("#{@settings.form} input[data-marx-hidden=true]").each (i, input) =>
       type = if $(input).attr('type') is 'hidden' then 'text' else 'hidden'
       $(input).attr('type', type)
       @effected.hidden_fields += 1
 
-    $("#{this.settings.form} input[type=hidden]").each (i, hidden) =>
+    $("#{@settings.form} input[type=hidden]").each (i, hidden) =>
       unless $(hidden).data('marx-d')?
         @effected.hidden_fields += 1
         $(hidden)
@@ -241,12 +249,11 @@ class Marx
       .text(to)
       .data('text', from)
 
-  generate_ipsum: () ->
-    marx = this.marx or this
+  generate_ipsum: () =>
     $('body').append "<marx-js-ipsum></marx-js-ipsum>"
     riot.mount 'marx-js-ipsum',
-      url: marx._url
-      position: this.settings.position
+      url: @_url
+      position: @settings.position
 
   get_random: () -> @marx_json[Math.floor(Math.random() * @marx_json.length)]
 
@@ -273,6 +280,27 @@ class Marx
       radio_buttons: 0
       hidden_fields: 0
     }
+
+  toggle_standard_controls: (open=null, on_complete=null) ->
+    if open is true
+      this.$('standard-controls').slideDown 'fast', on_complete
+    else if open is false
+      this.$('standard-controls').slideUp 'fast', on_complete
+    else
+      this.$('standard-controls').slideToggle 'fast', on_complete
+
+  toggle_advanced_controls: (open=null, on_complete=null) =>
+    link_text = if @$('advanced-controls').is(":visible") then "&laquo; Advanced" else "&raquo; Advanced"
+    $('a.marx-toggle-advanced').html link_text
+
+    if open is true
+      @$('advanced-controls').slideDown 'fast', on_complete
+    else if open is false
+      @$('advanced-controls').slideUp 'fast', on_complete
+    else
+      @$('advanced-controls').slideToggle 'fast', on_complete
+
+
 
   ###=====================
            EVENTS
@@ -358,19 +386,27 @@ class Marx
     if trigger?
       document.querySelector("a.#{trigger}").click()
 
-  open_controls: (e) =>
-    $('standard-controls').slideToggle 'fast', =>
-      @toggle_key_bindings $('standard-controls').is(":visible")
-      @open_advanced_controls(false) if @settings.controls is 'toggle-advanced'
-    false
+  handle_open_close_controls: (e) =>
+    e.preventDefault()
+    is_standard = $(e.target).hasClass('standard-controls')
 
-  open_advanced_controls: (open=null) ->
-    if open is true
-      $('advanced-controls').slideDown 'fast'
-    else if open is false
-      $('advanced-controls').slideUp 'fast'
-    else
-      $('advanced-controls').slideToggle 'fast'
-    false
+    switch @settings.controls
+      when 'standard', 'toggle-advanced'
+        @toggle_standard_controls()
+        @toggle_advanced_controls(false) if $('advanced-controls').is(":visible")
+      when 'advanced'
+        @toggle_standard_controls()
+        @toggle_advanced_controls()
+      when 'toggle-all'
+        if is_standard
+          if this.$('advanced-controls').is(':visible')
+            @toggle_advanced_controls false, => @toggle_standard_controls(true)
+          else
+            @toggle_standard_controls()
+        else
+          if this.$('standard-controls').is(':visible')
+            @toggle_standard_controls false, => @toggle_advanced_controls(true)
+          else
+            @toggle_advanced_controls()
 
 module.exports = Marx
