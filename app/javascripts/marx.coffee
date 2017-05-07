@@ -42,7 +42,7 @@ class Marx
     if this.settings.controls is 'toggle-advanced'
       $.extend control_opts, {
         toggle_advanced: true
-        func: this.toggle_advanced_controls
+        func: this.toggle_advanced
       }
 
     riot.mount 'marx-js-controls', control_opts
@@ -106,7 +106,7 @@ class Marx
         @methods[opt]()
 
   populate_whole_form: (e) =>
-    e.preventDefault()
+    e?.preventDefault()
     @populate_inputs()
     @populate_textareas()
     @populate_checkboxes()
@@ -290,9 +290,6 @@ class Marx
       this.$('standard-controls').slideToggle 'fast', on_complete
 
   toggle_advanced_controls: (open=null, on_complete=null) =>
-    link_text = if @$('advanced-controls').is(":visible") then "&laquo; Advanced" else "&raquo; Advanced"
-    $('a.marx-toggle-advanced').html link_text
-
     if open is true
       @$('advanced-controls').slideDown 'fast', on_complete
     else if open is false
@@ -354,12 +351,13 @@ class Marx
     false
 
   toggle_advanced: (e) =>
+    e.preventDefault()
     $link = $(e.target)
     txt = if $link.hasClass('opened') then "&laquo; Advanced" else "Close &raquo;"
     $link
       .toggleClass('opened')
       .html(txt)
-    @$('advanced-controls').toggle()
+    this.toggle_advanced_controls()
     false
 
   toggle_key_bindings: (bind) ->
