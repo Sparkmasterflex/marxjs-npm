@@ -12,13 +12,15 @@ $ = require('jquery')
   </div>
 
   <script type='coffee'>
-    num = $('advanced-controls ipsum input').val()
+    num = parseInt $('advanced-controls ipsum input').val()
     $.getJSON "#{opts.url}/monologues", (data) =>
       max = if num > data.length then data.length-1 else num
-      this.ipsums = data.sort () -> 0.5 - Math.random()
+      ipsums = data.sort () -> 0.5 - Math.random()
+      this.ipsums = ipsums[0..max-1]
       this.update()
 
     this.close_ipsum = (e) ->
+      e?.preventDefault()
       $('marx-js-ipsum').slideUp 'fast'
       false
   </script>
