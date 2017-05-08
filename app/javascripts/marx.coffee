@@ -7,6 +7,7 @@ simple        = require('../views/simple-open-controls')
 advanced      = require('../views/advanced-open-controls')
 
 styles = require('../stylesheets/base')
+{ STANDARD_KEYS, ADVANCED_KEYS } = require('./constants')
 
 class Marx
   settings:
@@ -287,7 +288,10 @@ class Marx
     else if open is false
       this.$('standard-controls').slideUp 'fast', on_complete
     else
+      open = not this.$('standard-controls').is(':visible')
       this.$('standard-controls').slideToggle 'fast', on_complete
+    this.toggle_keybindings open, this.standard_key_bindings
+
 
   toggle_advanced_controls: (open=null, on_complete=null) =>
     if open is true
@@ -295,7 +299,9 @@ class Marx
     else if open is false
       @$('advanced-controls').slideUp 'fast', on_complete
     else
+      open = not @$('advanced-controls').is(':visible')
       @$('advanced-controls').slideToggle 'fast', on_complete
+    this.toggle_keybindings open, this.advanced_key_bindings
 
   advanced_link_text: ->
     $link = $('a.marx-toggle-advanced')
@@ -304,9 +310,28 @@ class Marx
       .toggleClass('opened')
       .html(txt)
 
+  toggle_keybindings: (keybind, func) ->
+    if keybind
+      document.addEventListener 'keypress', func
+    else
+      document.removeEventListener 'keypress', func
+
   ###=====================
            EVENTS
   =====================###
+  standard_key_bindings: (e) ->
+    char = String.fromCharCode(e.keyCode)
+    if STANDARD_KEYS[char]?
+     $(".#{STANDARD_KEYS[char]}").trigger 'click'
+     # document.querySelector("a.#{trigger}").click()
+
+  advanced_key_bindings: (e) ->
+    char = String.fromCharCode(e.keyCode)
+    if ADVANCED_KEYS[char]?
+     $(".#{ADVANCED_KEYS[char]}").trigger 'click'
+     # document.querySelector("a.#{trigger}").click()
+
+
   popluate_selected_fields: (e) ->
     fn = switch $(e.target).attr('class')
       when 'populate-textareas'
@@ -368,23 +393,6 @@ class Marx
     else
       document.removeEventListener 'keypress', this.trigger_action
 
-  trigger_action: (e) ->
-    char = String.fromCharCode(e.keyCode)
-    trigger = switch char
-      when '1' then "populate-whole-form"
-      when '2' then "populate-textareas"
-      when '3' then "populate-inputs"
-      when '4' then "populate-checkboxes"
-      when '5' then "populate-radios"
-      when '6' then "populate-selects"
-      when '7' then "clear-form"
-      when '8' then "populate-submit"
-      when '9' then "show-hidden"
-      when '0' then "expand-select"
-      when '$' then "random-image"
-      when '%' then "generate-ipsum"
-    if trigger?
-      document.querySelector("a.#{trigger}").click()
 
   handle_open_close_controls: (e) =>
     e.preventDefault()
